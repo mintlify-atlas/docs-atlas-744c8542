@@ -1,0 +1,378 @@
+---
+title: "Export toolchain: MP4, GIF, PPTX, and PDF"
+description: "Complete reference for all export scripts — from HTML animation to MP4/GIF video, and from HTML slide decks to editable PPTX or merged PDF."
+---
+
+The export toolchain converts HTML output into shareable formats. The video pipeline turns animated HTML into broadcast-ready MP4 and optimized GIF files. The slide pipeline turns HTML decks into merged PDF documents or editable PPTX presentations. Each script is independent — run only the stages you need for your output format.
+
+## Video pipeline overview
+
+Animated HTML goes through three stages before it is a deliverable video:
+
+1. **`render-video.js`** — records the browser rendering the animation into a 25fps MP4 (intermediate file, not final)
+2. **`convert-formats.sh`** — derives a 60fps MP4 and a palette-optimized GIF from the 25fps source
+3. **`add-music.sh`** — mixes a BGM track from the built-in library into the MP4
+
+A silent MP4 is not a finished deliverable. The default expectation is a video with BGM and SFX. See the [audio design rules](#sfx-system--audio-design-rules) section below.
+
+---
+
+## render-video.js — HTML → 25fps MP4
+
+Records a Playwright browser session rendering your animation HTML into a WebM, then uses ffmpeg to transcode it to H.264 MP4.
+
+**Dependencies:** `npm install -g playwright` and `ffmpeg` on PATH.
+
+```bash
+NODE_PATH=$(npm root -g) node render-video.js <html-file> \
+  [--duration=30] [--width=1920] [--height=1080] \
+  [--trim=<seconds>] [--fontwait=1.5] [--readytimeout=8] \
+  [--keep-chrome]
+```
+
+**Output:** next to the HTML file, same basename with `.mp4` suffix.
+
+### How it works
+
+The recorder runs in two browser contexts:
+
+1. **Warmup context** (no recording) — caches fonts and assets, then closes cleanly.
+2. **Record context** (recording on) — Playwright's `recordVideo` starts writing WebM at context creation. Babel compilation, React mount, and `fonts.ready` can take 1.5–3 seconds during which the WebM writes black frames. The script waits for `window.__ready` (set automatically by `animations.jsx`'s `Stage` component after first paint), then trims exactly that offset.
+
+If `window.__ready` is never set, the script falls back to `--fontwait=1.5s`. You can override with `--trim=<seconds>`.
+
+**Chrome UI elements hidden by default:** The recorder injects CSS that hides progress bars, replay buttons, mastheads, and footers that are visible during debugging but should not appear in exported video. Pass `--keep-chrome` to disable this.
+
+### Animation-ready signal
+
+If you write a custom Stage (not using `animations.jsx`), set the ready signal manually:
+
+```js
+document.fonts.ready.then(() =>
+  requestAnimationFrame(() => { window.__ready = true; })
+);
+```
+
+Also check `window.__recording` to force `loop = false` when recording:
+
+```js
+if (window.__recording === true) {
+  loop = false;
+}
+```
+
+### Parameters
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--duration=N` | — | Animation length in seconds |
+| `--width=N` | 1920 | Viewport width |
+| `--height=N` | 1080 | Viewport height |
+| `--trim=N` | auto | Seconds to trim from the start (removes load time black frames) |
+| `--fontwait=N` | 1.5 | Fallback font load wait when `window.__ready` is not set |
+| `--readytimeout=N` | 8 | Max seconds to wait for `window.__ready` |
+| `--keep-chrome` | off | Disables hiding of UI chrome elements |
+
+---
+
+## convert-formats.sh — MP4 → 60fps MP4 + palette-optimized GIF
+
+Takes the 25fps MP4 from `render-video.js` and produces two derivatives.
+
+```bash
+./convert-formats.sh input.mp4 [gif_width] [--minterpolate]
+```
+
+**Output** (placed next to the input file):
+- `<name>-60fps.mp4` — H.264, 60fps, broad compatibility
+- `<name>.gif` — 15fps, scaled to `gif_width`, palette-optimized
+
+### 60fps modes
+
+| Mode | Command | Compatibility | When to use |
+|------|---------|---------------|-------------|
+| Frame-duplicate (default) | `./convert-formats.sh in.mp4` | QuickTime, Safari, Chrome, VLC | General delivery, social media, platform uploads |
+| Motion-compensated interpolation | `./convert-formats.sh in.mp4 --minterpolate` | macOS QuickTime / Safari may refuse | Heavy translate/scale motion where true 60fps interpolation is needed — test before delivering |
+
+<Warning>
+The `--minterpolate` output has a known QuickTime/Safari compatibility issue. macOS QuickTime sometimes refuses to open the file. Always test on the target player before delivering with this flag.
+</Warning>
+
+The 60fps label is primarily for upload-platform optics. For CSS-driven motion, perceived smoothness is identical to the 25fps source for most viewers.
+
+### GIF palette optimization
+
+GIF is limited to 256 colors. The script uses a two-pass approach to produce the best possible palette for this specific video:
+
+- **Pass 1:** `palettegen=stats_mode=diff` — scans the full video to generate a per-video optimal palette
+- **Pass 2:** `paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle` — encodes using that palette with Bayer dithering and rectangle diff (only updates changed regions)
+
+This keeps a 30-second 1080p animation GIF under ~4 MB with good color fidelity.
+
+### GIF width options
+
+| `gif_width` | Use case |
+|-------------|----------|
+| 960 (default) | General social platform use |
+| 1280 | Higher clarity, larger file |
+| 600 | Twitter/X preferred for fast loading |
+
+### Full ffmpeg commands (from source)
+
+```bash
+# 60fps frame-duplicate (default)
+ffmpeg -y -loglevel error -i "$INPUT" \
+  -vf "fps=60" \
+  -c:v libx264 -pix_fmt yuv420p -profile:v high -level 4.0 \
+  -crf 18 -preset medium -movflags +faststart \
+  "$OUT60"
+
+# GIF pass 1: generate palette
+ffmpeg -y -loglevel error -i "$INPUT" \
+  -vf "fps=15,scale=${GIF_WIDTH}:-1:flags=lanczos,palettegen=stats_mode=diff" \
+  "$PAL"
+
+# GIF pass 2: apply palette with dithering
+ffmpeg -y -loglevel error -i "$INPUT" -i "$PAL" \
+  -lavfi "fps=15,scale=${GIF_WIDTH}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" \
+  "$OUTGIF"
+```
+
+---
+
+## add-music.sh — MP4 + BGM → final MP4
+
+Mixes a background music track into the MP4. Music is trimmed to match video duration, with a 0.3s fade-in and 1.0s fade-out. Video stream is copied without re-encoding; audio is transcoded to AAC 192k.
+
+```bash
+bash add-music.sh <input.mp4> [--mood=<name>] [--music=<path>] [--out=<path>]
+```
+
+**Output:** `<input-basename>-bgm.mp4` by default, or the path specified with `--out`.
+
+### BGM library — 6 tracks
+
+All tracks are in `assets/bgm-<mood>.mp3`:
+
+| `--mood` | Style | Best-fit scenes |
+|---------|-------|-----------------|
+| `tech` (default) | Apple Silicon / product keynote — minimal synth + piano | Product launches, AI tools, skill promotion |
+| `ad` | Upbeat modern electronic with build + drop | Social media ads, product trailers, promotional clips |
+| `educational` | Warm, inviting — light guitar / electric piano | Explainers, tutorial introductions, course previews |
+| `educational-alt` | Alternate take of educational | Same as above, different track |
+| `tutorial` | Lo-fi ambient, stays out of the way | Software demos, coding tutorials, long walkthroughs |
+| `tutorial-alt` | Alternate take of tutorial | Same as above, different track |
+
+### Usage examples
+
+```bash
+# Default tech mood
+bash add-music.sh my-animation.mp4
+
+# Switch mood
+bash add-music.sh my-animation.mp4 --mood=ad
+
+# Specify output path
+bash add-music.sh my-animation.mp4 --mood=educational --out=final.mp4
+
+# Bring your own audio file
+bash add-music.sh my-animation.mp4 --music=~/Downloads/song.mp3
+```
+
+`--music` takes priority over `--mood`. Passing an invalid mood name prints the list of available options and exits without failing silently.
+
+### Audio behavior (from source)
+
+```bash
+ffmpeg -y -loglevel error \
+  -i "$INPUT" \
+  -i "$MUSIC" \
+  -filter_complex "[1:a]atrim=0:${DURATION},asetpts=PTS-STARTPTS,\
+    afade=t=in:st=0:d=0.3,afade=t=out:st=${FADE_OUT_START}:d=1[a]" \
+  -map 0:v -map "[a]" \
+  -c:v copy -c:a aac -b:a 192k -shortest \
+  "$OUTPUT"
+```
+
+---
+
+## SFX system — audio design rules
+
+A finished animation has two audio layers: BGM (atmosphere, handled by `add-music.sh`) and SFX (per-beat event sounds). A video with only BGM is at one-third completion — audiences perceive the absence of sound response as cheapness.
+
+### The 37 prebuilt SFX
+
+All SFX are in `assets/sfx/<category>/<name>.mp3`. There are 37 total, generated at 44.1kHz MP3 quality. Categories and counts:
+
+```
+assets/sfx/
+├── keyboard/      type, type-fast, delete-key, space-tap, enter
+├── ui/            click, click-soft, focus, hover-subtle, tap-finger, toggle-on
+├── transition/    whoosh, whoosh-fast, swipe-horizontal, slide-in, dissolve
+├── container/     card-snap, card-flip, stack-collapse, modal-open
+├── feedback/      success-chime, error-tone, notification-pop, achievement
+├── progress/      loading-tick, complete-done, generate-start
+├── impact/        logo-reveal, logo-reveal-v2, brand-stamp, drop-thud
+├── magic/         sparkle, ai-process, transform
+└── terminal/      command-execute, output-appear, cursor-blink
+```
+
+### Frequency isolation — mandatory
+
+BGM and SFX occupy different frequency bands so they do not mask each other:
+
+```bash
+[bgm_raw]lowpass=f=4000[bgm]    # BGM limited to <4kHz (mid-low)
+[sfx_raw]highpass=f=800[sfx]    # SFX pushed to 800Hz+ (mid-high)
+[bgm][sfx]amix=inputs=2:duration=first:normalize=0[a]
+```
+
+**Why:** The 2–5kHz band is most sensitive to human hearing. BGM covering the full spectrum masks SFX in that band. Lowpassing BGM and highpassing SFX keeps them in separate frequency territories, making SFX clearly audible at lower absolute volumes.
+
+### SFX density by scene type
+
+| Scene type | SFX per 10 seconds | Character |
+|------------|--------------------|-----------|
+| Product launch hero | ~6 per 10s | Energetic, information-dense |
+| Tool walkthrough | 0–2 per 10s | Calm, focused |
+| AI generation demo | ~8 per 10s | High-frequency feedback |
+| Long ambient | 3–5 total, not per 10s | Each SFX is a protagonist |
+
+Do not fill every visual beat with a sound. Removing 30–50% of cues makes the remaining ones more dramatic.
+
+### Full video + SFX + BGM ffmpeg template
+
+```bash
+ffmpeg -y -i video.mp4 -i sfx-track.mp3 -i bgm.mp3 \
+  -filter_complex "\
+[2:a]atrim=0:25,afade=in:st=0:d=0.3,afade=out:st=23.5:d=1.5,\
+     lowpass=f=4000,volume=0.45[bgm];\
+[1:a]highpass=f=800,volume=1.0[sfx];\
+[bgm][sfx]amix=inputs=2:duration=first:normalize=0[a]" \
+  -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 192k final.mp4
+```
+
+---
+
+## Complete video pipeline (standard run)
+
+```bash
+cd <project-directory>
+
+# 1. Record 25fps base MP4
+NODE_PATH=$(npm root -g) node "$SKILL/scripts/render-video.js" my-animation.html --duration=30
+
+# 2. Derive 60fps MP4 and GIF
+bash "$SKILL/scripts/convert-formats.sh" my-animation.mp4
+
+# 3. Add BGM
+bash "$SKILL/scripts/add-music.sh" my-animation-60fps.mp4 --mood=tech
+
+# Outputs:
+#   my-animation.mp4          25fps base (intermediate)
+#   my-animation-60fps.mp4    60fps frame-duplicate
+#   my-animation.gif          15fps palette-optimized GIF
+#   my-animation-60fps-bgm.mp4  final deliverable with music
+```
+
+---
+
+## Slide export pipeline
+
+HTML slide decks export to two formats: PDF (vector, searchable) and PPTX (two modes). Each script targets a specific deck architecture.
+
+| Script | Input architecture | Output |
+|--------|-------------------|--------|
+| `export_deck_pdf.mjs` | Multi-file deck (`deck_index.html` pattern) | Merged PDF, vector text |
+| `export_deck_stage_pdf.mjs` | Single-file `deck-stage` web component | Merged PDF, handles shadow DOM |
+| `export_deck_pptx.mjs --mode image` | Multi-file deck | PPTX with screenshot slides (100% visual fidelity, text not editable) |
+| `export_deck_pptx.mjs --mode editable` | Multi-file deck (with 4-constraint HTML) | PPTX with real text frames (text editable in PowerPoint) |
+
+---
+
+## export_deck_pdf.mjs — Multi-file deck → merged PDF
+
+Uses Playwright to render each slide HTML file and `pdf-lib` to merge the individual PDFs into one document. Text remains vector (copyable and searchable).
+
+**Dependencies:** `npm install playwright pdf-lib`
+
+```bash
+node export_deck_pdf.mjs --slides <dir> --out <file.pdf> [--width 1920] [--height 1080]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--slides` | required | Directory containing slide HTML files |
+| `--out` | required | Output PDF path |
+| `--width` | 1920 | Slide viewport width |
+| `--height` | 1080 | Slide viewport height |
+
+Slide files are sorted by filename before rendering (`01-intro.html` → `02-data.html` → ...).
+
+**Trade-off:** The PDF is not re-editable as HTML; to change content, edit the source HTML and re-export.
+
+---
+
+## export_deck_stage_pdf.mjs — Single-file deck-stage → PDF
+
+A specialized PDF exporter for `deck-stage` web component decks. It handles two issues that break the standard multi-file exporter on single-file decks:
+
+- **Shadow DOM slot rendering:** The standard `page.pdf()` approach sees only one page because `deck-stage` uses shadow DOM. This script navigates each slide explicitly before capturing.
+- **Absolute child overflow:** Absolutely positioned child elements that overflow the shadow root boundary are cropped correctly.
+
+**Dependencies:** `npm install playwright`
+
+This script is the correct exporter when your deck is built as a single HTML file using `assets/deck_stage.js`. Use `export_deck_pdf.mjs` for multi-file decks.
+
+---
+
+## export_deck_pptx.mjs — HTML deck → PPTX
+
+Exports a multi-file HTML deck to PPTX in two modes.
+
+**Dependencies:** `npm install playwright pptxgenjs` (add `sharp` for `--mode editable`)
+
+```bash
+# Image mode (default) — 100% visual fidelity, text not editable
+node export_deck_pptx.mjs --slides <dir> --out <file.pptx>
+
+# Editable mode — real text frames, requires constrained HTML
+node export_deck_pptx.mjs --slides <dir> --out <file.pptx> --mode editable
+```
+
+### `--mode image`
+
+Screenshots each slide as PNG and places it as a full-bleed image on each PPTX page. Visual output is 100% faithful to the HTML render. Text is not selectable or editable in PowerPoint.
+
+Use this mode when: the HTML uses complex CSS, gradients, or effects that cannot map to PowerPoint objects; or when visual fidelity is the priority and editing is not required.
+
+### `--mode editable`
+
+Calls `scripts/html2pptx.js` to translate DOM elements into native PowerPoint objects. Text frames are real text and can be double-clicked to edit in PowerPoint.
+
+**Requires the HTML to satisfy 4 hard constraints:**
+
+1. All text must be inside `<p>` or `<h1>`–`<h6>` elements — `div` elements cannot contain text directly
+2. No CSS gradients anywhere
+3. `<p>` and `<h*>` elements cannot have `background`, `border`, or `shadow` — put those on a wrapping `div`
+4. No `background-image` on `div` elements — use `<img>` instead
+
+<Warning>
+These constraints must be in place from the first line of the HTML. Visual HTML that ignores them cannot be retrofitted for editable PPTX export after the fact — the conversion will produce garbled output and requires 2–3 hours of rework.
+
+If a user asks for editable PPTX, confirm this requirement before writing any slide HTML.
+</Warning>
+
+The body defaults to 960pt × 540pt (LAYOUT_WIDE, 13.333″ × 7.5″) to match PowerPoint's widescreen layout.
+
+---
+
+## html2pptx.js — DOM computedStyle → PowerPoint object translator
+
+`html2pptx.js` is the internal engine called by `export_deck_pptx.mjs --mode editable`. It walks the DOM of each slide page, reads `window.getComputedStyle` for each element, and maps DOM nodes to PowerPoint object types:
+
+- `<p>` / `<h1>`–`<h6>` → text frame with font size, weight, color, and alignment from computed style
+- Solid-background `<div>` → filled shape
+- `<img>` → picture object
+
+This translator only works reliably when the HTML satisfies the 4 constraints listed above. Visually complex HTML that relies on gradients, layered backgrounds, or text-in-div patterns will produce incorrect output.

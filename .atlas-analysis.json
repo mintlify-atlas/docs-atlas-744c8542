@@ -1,0 +1,93 @@
+{
+  "projectType": "general",
+  "projectName": "Huashu Design",
+  "projectDescription": "An agent-agnostic Claude Code skill that turns a single sentence into production-ready HTML prototypes, slide decks, motion animations, and infographics — using 20 design philosophies, brand asset protocols, and a complete MP4 export toolchain.",
+  "theme": "willow",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "what-it-does"
+            ]
+          },
+          {
+            "group": "Core Mechanics",
+            "pages": [
+              "core/junior-designer-workflow",
+              "core/brand-asset-protocol",
+              "core/design-direction-advisor",
+              "core/anti-ai-slop"
+            ]
+          },
+          {
+            "group": "Capabilities",
+            "pages": [
+              "capabilities/interactive-prototypes",
+              "capabilities/slide-decks",
+              "capabilities/motion-design",
+              "capabilities/design-variations",
+              "capabilities/infographics",
+              "capabilities/expert-critique"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/design-philosophies",
+              "reference/starter-components",
+              "reference/export-toolchain",
+              "reference/configuration"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "20 design philosophies across 5 schools (Pentagram, Field.io, Kenya Hara, Sagmeister, Takram, etc.)",
+    "Core Asset Protocol: 5-step brand asset gathering (logo, product shots, UI screenshots, colors, fonts)",
+    "Junior Designer workflow: assumptions + placeholders + early show before full execution",
+    "iOS/Android/macOS/Browser frame starter components for hi-fi prototypes",
+    "HTML → MP4 (25fps/60fps) + GIF export pipeline with BGM and SFX",
+    "HTML → editable PPTX via DOM-to-PowerPoint translation (real text frames, not images)",
+    "Design Direction Advisor fallback mode for vague briefs",
+    "5-dimension expert critique (philosophical coherence, visual hierarchy, craft, functionality, innovation)",
+    "Tweaks system for live parameter switching of design variants",
+    "Playwright-based click testing before delivery",
+    "Agent-agnostic: works with Claude Code, Cursor, Codex, OpenClaw, Hermes"
+  ],
+  "publicApiSurface": [
+    "npx skills add alchaincyf/huashu-design",
+    "SKILL.md — main skill prompt read by agents",
+    "assets/animations.jsx — Stage + Sprite + useTime + useSprite + interpolate + Easing APIs",
+    "assets/ios_frame.jsx — IosFrame component with Dynamic Island/status bar/Home Indicator",
+    "assets/android_frame.jsx — Android device frame component",
+    "assets/macos_window.jsx — macOS window chrome component",
+    "assets/browser_window.jsx — browser window with URL bar component",
+    "assets/deck_stage.js — deck-stage web component for single-file HTML slide decks",
+    "assets/deck_index.html — multi-file deck assembler with iframe and keyboard navigation",
+    "assets/design_canvas.jsx — side-by-side variation display grid",
+    "scripts/render-video.js — HTML → MP4 (25fps)",
+    "scripts/convert-formats.sh — MP4 → 60fps interpolated + palette-optimized GIF",
+    "scripts/add-music.sh — MP4 + BGM mixer",
+    "scripts/export_deck_pdf.mjs — HTML deck → merged PDF",
+    "scripts/export_deck_pptx.mjs — HTML deck → PPTX (image or editable mode)",
+    "scripts/html2pptx.js — DOM computedStyle → PowerPoint objects translator",
+    "scripts/verify.py — Playwright-based verification helper",
+    "references/design-styles.md — 20 design philosophies with prompt DNA",
+    "references/critique-guide.md — 5-dimension critique scoring rubric",
+    "references/slide-decks.md — slide architecture guide",
+    "references/video-export.md — MP4/GIF export pipeline",
+    "references/audio-design-rules.md — BGM + SFX dual-track rules",
+    "references/react-setup.md — React + Babel pinned versions and scope rules"
+  ]
+}

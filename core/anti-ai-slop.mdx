@@ -1,0 +1,72 @@
+---
+title: "Anti-AI-slop rules: avoiding generic visual output"
+description: "Why AI design defaults look generic, which visual patterns to avoid, and what to do instead to produce work with real brand identity."
+---
+
+AI design tools produce outputs that tend to look the same: purple gradients, emoji icons, rounded cards with a colored left-border accent, SVG drawings of human faces, deep blue dark mode, Inter everywhere. These patterns are not ugly in isolation — they are ubiquitous because they work well enough in generic contexts. The problem is that they carry no brand information. A user who asks for a design wants their brand to be recognizable in the output. AI defaults produce the visual average of all training data — which means no specific brand is represented by any of it.
+
+Avoiding AI slop is not an aesthetic preference. It is the mechanism by which a design actually serves its purpose.
+
+## What AI slop is and why it matters
+
+**AI slop = the visual least common denominator of AI training data.**
+
+The logic chain:
+
+1. A user asks for a design because they want their brand to be recognized.
+2. AI defaults produce the mean of all training data — the mixture of every brand.
+3. The mixture represents no specific brand.
+4. Therefore AI defaults actively dilute brand identity.
+
+This is why the Brand Asset Protocol (§1.a) is the most important constraint in the entire system: following the protocol is the *positive* way to avoid slop (doing the right thing). The avoid list below is the *negative* way (not doing the wrong thing). Both are necessary.
+
+<Note>
+**The brand exception principle:** "The brand itself uses this" is the only valid reason to use a pattern on the avoid list. If a brand's spec explicitly calls for purple gradients, then purple gradients are that brand's signature — not slop. If a product's audience is children and emoji icons are contextually appropriate, use them. The rule is: default AI patterns are slop *because they are defaults*, not because they are inherently wrong. When a pattern is driven by brand identity rather than AI habit, it is no longer slop.
+</Note>
+
+## Patterns to avoid — and why
+
+| Pattern | Why it is slop | When it can be used |
+|---|---|---|
+| **Purple / violet gradients** | The universal "tech / AI / SaaS" formula in AI training data. Appears on every landing page, every pitch deck, every AI product — brand identity approaches zero. | Brand spec explicitly uses purple gradients (e.g., some Linear contexts), or the task is satirizing / demonstrating this pattern. |
+| **Emoji as icons** | Training data pairs every bullet with an emoji — it signals "I couldn't find a real icon, so I used an emoji." | The brand itself uses emoji (e.g., Notion), or the product audience is genuinely casual / playful. |
+| **Rounded card + left colored border accent** | The 2020–2024 Material / Tailwind era visual cliché. So common it has become noise that readers ignore rather than read. | User explicitly requests it, or this combination appears in the brand's own design spec. |
+| **SVG-drawn imagery (faces, scenes, objects)** | AI-drawn SVG figures have consistently misaligned proportions, uncanny faces, and no stylistic coherence. They read as "couldn't find a real image." | Almost never — use real images (Wikimedia / Unsplash / AI-generated via nano-banana-pro), or use an honest placeholder. |
+| **CSS silhouettes / SVG stand-ins for real product images** | The result is a "generic tech animation" — dark background, colored accent, rounded bars. Any brand could be swapped in. Zero recognition value. (DJI Pocket 4 case, 2026-04-20.) | Almost never — run the Brand Asset Protocol and find the real product image. Last resort: use nano-banana-pro with an official reference image as the base. |
+| **Inter / Roboto / Arial / system fonts as display** | These typefaces signal "this is a demo page" or "I used the default." They are invisible — they create no impression of designed intent. | Brand spec explicitly calls for these fonts with intentional treatment (e.g., Stripe's use of a tuned Inter variant). |
+| **Cyberpunk neon on deep blue `#0D1117` dark background** | The GitHub dark mode aesthetic copied wholesale. Signals "developer tool built without a designer" rather than "developer tool designed to be beautiful." | Developer tool products where the brand intentionally occupies this space. |
+
+<Warning>
+**Hardest rules to internalize:**
+
+The CSS-silhouette ban is the most commonly broken rule. When a product image cannot be found quickly, the temptation is to draw a stylized SVG outline and keep moving. Do not. Run the five search rounds from the 5-10-2-8 rule. If the image genuinely cannot be found, use AI generation from an official reference, then ask the user, then use an honest placeholder with a clear label. A placeholder that says "product image pending" is more professional than a silhouette that says nothing about the actual product.
+
+The font rule is similarly easy to rationalize away: "Inter is clean and readable." Clean and readable are not the same as designed. Every project that defaults to Inter as a display face is one more project indistinguishable from every other AI-default project.
+</Warning>
+
+## What to do instead
+
+| Category | Avoid | Adopt |
+|---|---|---|
+| **Typography** | Inter / Roboto / Arial / system fonts as display | Distinctive display + body pairings (Newsreader, Source Serif, EB Garamond for editorial; brand-specified faces otherwise) |
+| **Color** | Purple gradients, colors invented on the spot | `oklch()` color definitions, or colors extracted directly from the brand spec — no new colors introduced ad hoc |
+| **Containers** | Rounded card + left colored border accent | Honest boundaries and separators; whitespace as structure |
+| **Imagery** | SVG-drawn scenes, CSS silhouettes, product outlines | Real assets sourced via the Brand Asset Protocol; AI generation (nano-banana-pro) when real assets are unavailable |
+| **Icons** | Decorative icons on every heading or list item | Icons only when they carry information not communicated by the text; absence of icons is a valid design choice |
+| **Filler content** | Invented statistics, stock quotes, decorative numbers | Honest placeholders for missing data; empty space resolved with composition, not content |
+| **Animation** | Scattered micro-interactions on every element | One well-orchestrated page-load sequence with clear narrative pacing |
+| **Dark mode** | Deep blue `#0D1117` + neon accent | Brand-specified dark palette, or a dark tone derived from the brand's primary color |
+
+**CSS and layout techniques that signal genuine design craft:**
+
+- `text-wrap: pretty` — prevents orphaned words at line endings, a detail that separates designed typography from default output
+- CSS Grid with intentional column and row definitions — not just flexbox with gap
+- `oklch()` color space — produces perceptually consistent color palettes that are hard to achieve by guessing hex values
+- Serif display faces — immediately communicate that a typographic decision was made, rather than deferred
+- **One detail at 120%, everything else at 80%** — brand taste lives in the one element that is precisely right, not in even effort across all elements
+
+## Displaying anti-patterns in documentation or demos
+
+When the task itself requires showing an example of bad design (as in a tutorial, critique, or comparison), do not fill the page with slop. Instead, isolate the bad-sample in a clearly labeled container: add a dashed border and a visible "Anti-pattern — do not use" label. The counter-example serves the narrative; it should not contaminate the overall page design.
+
+Full content guidelines are in `references/content-guidelines.md`.

@@ -1,0 +1,180 @@
+---
+title: "5-dimension expert design critique and scoring"
+description: "Request a structured expert review of any design — scored across 5 dimensions with a radar chart, Keep/Fix list, and Quick Wins punch list."
+---
+
+The Huashu-Design critique mode provides a structured expert review of any design output — not a vague impression, but a scored analysis across five dimensions with severity-ranked fixes and a list of the highest-leverage changes you can make in five minutes. The review evaluates the design, not the designer.
+
+## Trigger phrases
+
+The critique mode activates automatically when your message contains any of the following:
+
+| Language | Trigger phrases |
+|----------|-----------------|
+| Chinese | `评审` · `好不好看` · `打分` · `这个怎么样` |
+| English | `review` · `critique` · `score` · `rate this` · `what do you think of` |
+| Either | Sharing a design file and asking for feedback in any form |
+
+You can also request a critique proactively after delivery: "给我做个评审" or "run a critique before we finalize."
+
+## The 5 dimensions
+
+Each dimension is scored 0–10. The five scores are combined into a weighted overall score and visualized as a radar chart.
+
+<AccordionGroup>
+  <Accordion title="1. Philosophical coherence (哲学一致性)">
+    Does every element in the design follow from a single coherent design philosophy?
+
+    A design that mixes Kenya Hara minimalism with dense data-dashboard patterns is not "flexible" — it is incoherent. Each design decision (typeface choice, whitespace ratio, color temperature, motion easing) should be derivable from the same underlying philosophy.
+
+    | Score | Standard |
+    |-------|----------|
+    | 9–10 | Every detail has a philosophical basis; the whole is greater than the sum of parts |
+    | 7–8 | Overall direction is correct; one or two elements deviate from the core philosophy |
+    | 5–6 | The intent is visible, but elements from conflicting philosophies have been mixed in |
+    | 3–4 | Surface imitation only — the visual form exists without the philosophical understanding |
+    | 1–2 | No detectable relationship to any coherent design philosophy |
+
+    **Review questions:**
+    - Does this use the signature techniques of the referenced designer or school?
+    - Do color, type, and layout form a coherent system?
+    - Are there self-contradicting elements? (Choosing Kenya Hara and then filling every centimeter with content)
+  </Accordion>
+
+  <Accordion title="2. Visual hierarchy (视觉层级)">
+    Does the reader's eye travel in the order the designer intended?
+
+    Hierarchy is not decoration — it is the mechanism that decides what the reader understands first, second, and third. A flat design where every element competes equally communicates nothing efficiently.
+
+    | Score | Standard |
+    |-------|----------|
+    | 9–10 | The eye flows naturally along the intended path; information acquisition is frictionless |
+    | 7–8 | Primary and secondary relationships are clear; one or two mid-level elements are ambiguous |
+    | 5–6 | Headline and body text are distinguishable, but intermediate hierarchy is confused |
+    | 3–4 | Information is presented at uniform visual weight with no clear entry point |
+    | 1–2 | The reader cannot determine where to look first |
+
+    **Review questions:**
+    - Is the size contrast between headline and body at least 2.5× ?
+    - Do color, weight, and scale build 3–4 distinct tiers?
+    - Does whitespace actively guide the eye?
+    - The "squint test": with eyes half-closed, is hierarchy still legible?
+  </Accordion>
+
+  <Accordion title="3. Craft quality (细节执行)">
+    Is the execution pixel-accurate? Craft is the distance between "looks designed" and "is designed."
+
+    | Score | Standard |
+    |-------|----------|
+    | 9–10 | Pixel-level precision; alignment, spacing, and color are without flaw |
+    | 7–8 | Overall refinement is high; one or two minor alignment/spacing issues |
+    | 5–6 | Basic alignment holds, but spacing is inconsistent and color usage is not systematic |
+    | 3–4 | Visible alignment errors, irregular spacing, too many colors |
+    | 1–2 | The work reads as a rough draft |
+
+    **Review questions:**
+    - Is an 8pt spacing grid in use? (Spacing uses only 8/16/24/32/48/64px)
+    - Is spacing between same-type elements consistent?
+    - Is the color palette contained? (Typically no more than 3–4 colors)
+    - Is the typeface count controlled? (Typically no more than 2 families)
+    - Are edge alignments precise?
+  </Accordion>
+
+  <Accordion title="4. Functionality (功能性)">
+    Does every design element serve the communication goal, with nothing left over?
+
+    | Score | Standard |
+    |-------|----------|
+    | 9–10 | Every element serves the objective; zero redundancy |
+    | 7–8 | Functional intent is clear; a small number of decorative elements could be removed |
+    | 5–6 | Basically usable, but decorative elements visibly compete for attention |
+    | 3–4 | Form dominates function; users must work to find information |
+    | 1–2 | Decoration has completely submerged the information-delivery purpose |
+
+    **Review questions:**
+    - Would removing any single element make the design worse? (If not, remove it)
+    - Is the CTA or key information in the most prominent position?
+    - Is anything present "because it looks good" without serving a purpose?
+    - Does information density match the medium? (Slides should be sparse; PDFs can be denser)
+  </Accordion>
+
+  <Accordion title="5. Originality (创新性)">
+    Does the design say something that only this designer, for this project, at this moment would say?
+
+    | Score | Standard |
+    |-------|----------|
+    | 9–10 | Fresh and surprising; finds a unique expression within the chosen philosophy |
+    | 7–8 | Has a point of view; not a template substitution |
+    | 5–6 | Competent but generic; could have been produced by any trained practitioner |
+    | 3–4 | Heavy reliance on clichés (gradient spheres for AI, neon on dark for "tech") |
+    | 1–2 | Indistinguishable from a template or clip-art assembly |
+
+    **Review questions:**
+    - Have the common AI-generation defaults been avoided? (Purple gradient, emoji bullets, left-border-accent cards)
+    - Is there a design decision that is "unexpected but exactly right"?
+    - Does this carry the client's or project's specific identity — or could it belong to anyone?
+  </Accordion>
+</AccordionGroup>
+
+## Critique output format
+
+Every critique produces four sections in sequence:
+
+<Steps>
+  <Step title="Radar chart">
+    The five dimension scores plotted as a radar chart, with the overall score (weighted average) in the center. This lets you see at a glance which dimensions are strong and which need the most work.
+  </Step>
+  <Step title="Keep list">
+    Specific design decisions that are working well, named with design language. "The 60px heading / 16px body contrast establishes a strong reading hierarchy" — not "the layout is good."
+  </Step>
+  <Step title="Fix list (severity-ranked)">
+    Issues sorted by impact level:
+
+    | Marker | Severity | Meaning |
+    |--------|----------|---------|
+    | ⚠️ Fatal | Must fix before delivery | Communicates wrong information, breaks brand identity, or makes the design actively confusing |
+    | ⚡ Important | Fix before final | Significantly weakens the design but does not break it |
+    | 💡 Optimize | Polish pass | Refinements that improve craft without changing the design direction |
+
+    Each issue includes: current state description, why it is a problem, and a specific fix with numeric values where applicable.
+  </Step>
+  <Step title="Quick Wins">
+    The three highest-leverage changes achievable in five minutes or fewer. Ordered by impact-to-effort ratio.
+  </Step>
+</Steps>
+
+## Sample output structure
+
+```markdown
+## Design Review
+
+**Overall: 6.8/10** [Good — ready for refinement pass]
+
+**Dimension scores:**
+- Philosophical coherence: 7/10 — Direction is clear; one color choice deviates
+- Visual hierarchy: 8/10 — Strong primary/secondary contrast throughout
+- Craft quality: 6/10 — Spacing is inconsistent across card components
+- Functionality: 7/10 — Information architecture is clean; footer has unused elements
+- Originality: 6/10 — Competent execution; headline treatment is generic
+
+### Keep
+- The 64px / 16px type contrast creates a confident reading hierarchy on mobile
+- Single rust accent (#C04A1A) is maintained consistently — no accent color drift
+
+### Fix
+
+**1. Inconsistent card padding** — ⚡ Important
+- Current: Cards use 16px, 20px, and 24px padding inconsistently
+- Problem: Breaks the 8pt grid; makes the grid feel unstable
+- Fix: Normalize all card padding to 24px (3 × 8pt)
+
+**2. Background texture opacity** — 💡 Optimize
+- Current: Grain texture at opacity 0.15 competes with text
+- Problem: Reduces body text contrast below WCAG AA on light backgrounds
+- Fix: Reduce opacity to 0.06
+
+### Quick Wins
+- [ ] Set all card padding to 24px (2 minutes)
+- [ ] Reduce grain texture opacity from 0.15 to 0.06 (30 seconds)
+- [ ] Replace "Learn More" CTA with a specific action verb ("See the full report") (1 minute)
+```

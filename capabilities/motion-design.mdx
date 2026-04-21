@@ -1,0 +1,189 @@
+---
+title: "Create motion animations and export to MP4 and GIF"
+description: "Build timeline-driven animations using the Stage + Sprite model, then export to 25fps/60fps MP4 and palette-optimized GIF with BGM and SFX."
+---
+
+Huashu-Design animations are timeline-driven HTML files built on a Stage + Sprite model borrowed from After Effects and Remotion, but zero-dependency and fully browser-native. The default deliverable is an MP4 with background music and synchronized sound effects — a silent render is an unfinished deliverable.
+
+## The Stage + Sprite time-slice model
+
+The animation engine lives in `assets/animations.jsx`. Every animation has one `<Stage>` (the global timeline) and any number of `<Sprite>` children. A Sprite is visible only between its `start` and `end` seconds. Components inside a Sprite read their own local progress with `useSprite()`.
+
+```jsx
+// Destructure from window.Animations after inlining assets/animations.jsx
+const { Stage, Sprite, useTime, useSprite, Easing, interpolate } = window.Animations;
+
+function TitleCard() {
+  const { t } = useSprite();  // t: 0 → 1 over the sprite's duration
+  const opacity = interpolate(t, [0, 1], [0, 1], Easing.easeOut);
+  const y       = interpolate(t, [0, 1], [40, 0], Easing.easeOut);
+  return (
+    <h1 style={{ opacity, transform: `translateY(${y}px)`, fontSize: 120, fontWeight: 900 }}>
+      Hello.
+    </h1>
+  );
+}
+
+function Scene() {
+  return (
+    <Stage duration={10}>
+      <Sprite start={0} end={3}>
+        <TitleCard />
+      </Sprite>
+      <Sprite start={2} end={5}>
+        <SubTitle />
+      </Sprite>
+    </Stage>
+  );
+}
+```
+
+`Stage` provides auto-scale (fit viewport), a scrubber, and play/pause/loop controls. Set `window.__recording = true` before the export pipeline to disable looping.
+
+## The 4 core APIs
+
+<AccordionGroup>
+  <Accordion title="useTime() — global timeline position">
+    Returns the current playback time in seconds. Use when a component needs to react to the absolute timeline rather than its own Sprite window.
+
+    ```jsx
+    function GlobalClock() {
+      const t = useTime();
+      return <span>{t.toFixed(2)}s</span>;
+    }
+    ```
+  </Accordion>
+  <Accordion title="useSprite() — local Sprite progress">
+    Returns `{ t, elapsed, duration }` where `t` is the normalized progress from 0 to 1 within the parent Sprite's time window.
+
+    ```jsx
+    function FadeIn({ children }) {
+      const { t } = useSprite();
+      const opacity = interpolate(t, [0, 0.3], [0, 1], Easing.easeOut);
+      return <div style={{ opacity }}>{children}</div>;
+    }
+    ```
+  </Accordion>
+  <Accordion title="interpolate(t, input, output, easing?) — range mapping">
+    Maps `t` from an input range to an output range with optional easing. Values outside the input range are clamped.
+
+    ```jsx
+    // Slide in from 100px below during the first 40% of the Sprite
+    const y = interpolate(t, [0, 0.4], [100, 0], Easing.expoOut);
+    ```
+  </Accordion>
+  <Accordion title="Easing — built-in curves">
+    From `assets/animations.jsx`:
+
+    | Curve | Best for |
+    |-------|----------|
+    | `linear` | Scrolling credits, continuous loops |
+    | `easeIn` | Exit / disappear animations |
+    | `easeOut` | Basic entrance animations |
+    | `easeInOut` | Position changes |
+    | `expoOut` ⭐ | **Default main easing** — fast start, slow stop; gives elements physical weight |
+    | `overshoot` ⭐ | Toggle animations, button pop-out, strong emphasis |
+    | `spring` | Interactive feedback, geometric snap-to-position |
+    | `anticipation` | Emphasized action start |
+
+    Default to `expoOut` for entrances and `easeIn` for exits. Use `overshoot` for toggle/interactive elements.
+  </Accordion>
+</AccordionGroup>
+
+## Export pipeline
+
+Three scripts in `scripts/` produce the full deliverable set from a finished animation HTML file.
+
+<Steps>
+  <Step title="render-video.js — record 25fps base MP4">
+    Playwright records the animation at 25fps (the Chromium headless compositor ceiling). The `--trim` flag removes the initial page-load and font-loading frames.
+
+    ```bash
+    NODE_PATH=$(npm root -g) node scripts/render-video.js my-animation.html \
+      --duration=25 \
+      --width=1920 --height=1080 \
+      --trim=2.2
+    ```
+
+    Output: `my-animation.mp4` in the same directory. This is an intermediate file, not the final deliverable.
+  </Step>
+  <Step title="convert-formats.sh — derive 60fps MP4 and GIF">
+    Generates a 60fps version and a palette-optimized GIF from the 25fps source.
+
+    ```bash
+    bash scripts/convert-formats.sh my-animation.mp4
+    # Produces:
+    # my-animation-60fps.mp4  (60fps frame-copy, universal compatibility)
+    # my-animation.gif        (960px wide, 15fps, palette-optimized)
+    ```
+
+    Add `--minterpolate` to enable true motion-interpolated 60fps. Note: minterpolated output has known compatibility issues with macOS QuickTime — test the target player before delivering.
+  </Step>
+  <Step title="add-music.sh — mix BGM and SFX">
+    Adds a BGM track to the silent MP4. The script trims audio to match video length and applies 0.3s fade-in and 1.0s fade-out.
+
+    ```bash
+    bash scripts/add-music.sh my-animation-60fps.mp4 --mood=tech
+    # Or supply a custom audio file:
+    bash scripts/add-music.sh my-animation.mp4 --music=path/to/audio.mp3 --out=final.mp4
+    ```
+  </Step>
+</Steps>
+
+## Output formats
+
+| Format | Specs | Best for |
+|--------|-------|----------|
+| MP4 25fps | 1920×1080 · H.264 · CRF 18 · ~1–2 MB/30s | WeChat, social embeds, general delivery |
+| MP4 60fps | 1920×1080 · frame-copy or minterpolate · ~1.5–3 MB/30s | Bilibili, portfolio sites, high-frame-rate showcase |
+| GIF | 960×540 · 15fps · palette-optimized · ~2–4 MB/30s | Twitter/X, README files, Slack previews |
+
+The GIF pipeline uses a two-pass approach: `palettegen=stats_mode=diff` scans the full video to build an optimal 256-color palette for this specific animation, then `paletteuse=dither=bayer` encodes with that palette. This produces significantly sharper results than a single-pass encode.
+
+## Audio: BGM tracks and SFX
+
+### The "audio is mandatory" rule
+
+A silent MP4 is an unfinished deliverable. The export pipeline always includes audio unless the user explicitly says otherwise ("no audio", "silent version", "I'll add my own voiceover").
+
+### 6 built-in BGM tracks
+
+| File | Style | Scene |
+|------|-------|-------|
+| `bgm-tech.mp3` | Minimal synth + piano (Apple Silicon aesthetic) | Product launches, AI tools, skill promos |
+| `bgm-ad.mp3` | Upbeat electronic with build + drop | Social media ads, product teasers, promos |
+| `bgm-educational.mp3` | Warm, bright, light guitar/electric piano | Science explainers, course intros |
+| `bgm-educational-alt.mp3` | Same mood, different track | Alternative for educational content |
+| `bgm-tutorial.mp3` | Lo-fi ambient, nearly invisible | Software demos, coding tutorials |
+| `bgm-tutorial-alt.mp3` | Same mood, different track | Alternative for tutorial content |
+
+### SFX dual-track system
+
+BGM and SFX occupy separate frequency bands so neither masks the other:
+
+```bash
+# BGM occupies low-to-mid frequencies
+[bgm_raw]lowpass=f=4000[bgm]
+
+# SFX occupies mid-to-high frequencies
+[sfx_raw]highpass=f=800[sfx]
+
+# Mix without normalization (preserving dynamic range)
+[bgm][sfx]amix=inputs=2:duration=first:normalize=0[a]
+```
+
+BGM volume: 0.40–0.50. SFX volume: 1.00. The 6–8 dB loudness gap between them is what makes SFX audible — not absolute SFX level.
+
+<Info>
+Only BGM is a silent render. SFX layer is designed to fire on specific visual beats (button clicks, card transitions, logo reveals). A render without SFX has BGM but lacks the frame-level audio-visual sync that makes motion feel physically real.
+</Info>
+
+## Validating audio with ffprobe
+
+Before delivering any MP4, confirm the file has an audio stream:
+
+```bash
+ffprobe -select_streams a -show_entries stream=codec_type -of csv=p=0 final.mp4
+# Expected output: audio
+# No output = silent file, not ready to deliver
+```

@@ -1,0 +1,135 @@
+---
+title: "Junior Designer workflow: show early, iterate fast"
+description: "How Huashu Design's Junior Designer mode works: batch questions, post assumptions and placeholders first, then iterate toward the final deliverable."
+---
+
+The most expensive design mistake is building in the wrong direction for too long. Huashu Design's Junior Designer mode exists to prevent exactly that: before any real code is written, the agent surfaces its assumptions, posts placeholder structure, and waits for a human signal. A misunderstood brief corrected at the placeholder stage costs minutes; the same correction after a full pass costs hours. The entire workflow is built around this asymmetry — **showing early is 100× cheaper than fixing late**.
+
+## The 4 checkpoints
+
+Four hard stops are baked into the workflow. Every 🛑 checkpoint is a real pause: the agent states what it has done and what it intends to do next, then waits for confirmation before continuing.
+
+<Note>
+**Checkpoint 1 — 问题清单 (Question list):** Batch all clarifying questions into a single list and send it to the user at once. Do not ask questions one by one while working. Wait for the user to answer in full before proceeding.
+</Note>
+
+<Note>
+**Checkpoint 2 — 资产自检 (Asset self-check):** Before writing any component code, confirm that core assets are in place. Physical products need real product images (not CSS silhouettes). Digital products need a logo plus UI screenshots. Colors must be extracted from real HTML/SVG files. If anything is missing, stop and source it — do not proceed with generics.
+</Note>
+
+<Note>
+**Checkpoint 3 — Junior pass show:** As soon as the placeholder structure exists — even if it is just grey blocks with text labels — show it to the user and wait for feedback before writing full components. A skeleton with honest placeholders is a valid deliverable at this stage.
+</Note>
+
+<Note>
+**Checkpoint 4 — 交付前验证 (Pre-delivery check):** Before handing off the final output, open it in a real browser (or run a Playwright screenshot) and do a visual pass. AI-generated code frequently has interaction bugs that are invisible in static review.
+</Note>
+
+## When to skip clarifying questions — and when to batch them
+
+Not every task needs a question round. Use this rule:
+
+- **Skip questions:** Small fixes, follow-up iterations, or tasks where the user has already supplied a clear brief with screenshots and design context.
+- **Batch questions (default):** New tasks, vague requests, anything without an existing design system or brand reference. In these cases, compile the full question list — design context, variations, fidelity, Tweaks parameters, and at least four task-specific questions — and send it all at once. One round, user answers in bulk, then work begins.
+
+The question template from `references/workflow.md` provides the structure to use in conversation when no structured UI is available.
+
+## 位置四问 — The 4 positioning questions
+
+Before writing a single line of CSS for any page, screen, or slide, answer these four questions. They determine the entire design system. The system serves the answers; the answers are never reverse-engineered from a pre-chosen system.
+
+<Accordion title="Answer all four before touching layout or color">
+
+**1. 叙事角色 — Narrative role**
+
+What is this page's job in the larger piece? Hero, transition, data, pull-quote, or closing? A ten-slide deck has a different narrative role on every slide, and the visual weight should reflect that.
+
+**2. 观众距离 — Viewing distance**
+
+Is the viewer 10 cm away on a phone, 1 m away on a laptop, or 10 m away on a projected screen? This single variable determines type size, information density, and contrast requirements more than any other.
+
+**3. 视觉温度 — Visual temperature**
+
+What emotional register does this page need? Quiet, excited, cold, authoritative, warm, or melancholic? This drives color palette decisions and animation pacing.
+
+**4. 容量估算 — Capacity estimate**
+
+Sketch three 5-second thumbnails on paper and check whether the content actually fits. This step prevents overflow and crowding before any code is written — fixing a layout that is 20% too dense after the fact takes far longer than catching it in a thumbnail.
+
+</Accordion>
+
+## The full 10-step standard workflow
+
+<Steps>
+  <Step title="Understand the brief">
+    Verify facts first if the task involves a specific product, technology, or named event — run `WebSearch` before asking any questions. For new or vague tasks, batch all clarifying questions and send them at once. For slide or presentation tasks, also confirm the final delivery format (browser / PDF / editable PPTX) before writing a single line, because the architecture cannot be changed later without a full rewrite.
+
+    🛑 **Checkpoint 1:** Send the question list. Wait for the user to answer before continuing.
+  </Step>
+
+  <Step title="Explore resources and extract core assets">
+    Read any existing design system, uploaded screenshots, or linked code. If the task involves a specific brand, run the full 5-step Brand Asset Protocol: ask for assets → search official channels → download logo / product images / UI screenshots → verify → write `brand-spec.md`.
+
+    🛑 **Checkpoint 2 (asset self-check):** Confirm all core assets are present before writing components.
+  </Step>
+
+  <Step title="Answer the 位置四问, then vocalize the design system">
+    Answer the four positioning questions for each page or screen. Then state the design system out loud — color, type, layout rhythm, component pattern — and wait for the user to confirm the direction.
+
+    🛑 Changing direction after full implementation costs 100× more than changing it at this stage.
+  </Step>
+
+  <Step title="Build the folder structure">
+    Create the project directory. Copy only the assets that will actually be used (not bulk copies of more than 20 files). Place the main HTML at the root.
+  </Step>
+
+  <Step title="Junior pass — assumptions, placeholders, reasoning">
+    Write the HTML skeleton. At the top of the file, add a comment block stating your assumptions, your reasoning, and which elements are placeholders. Use explicit, honest placeholders: grey blocks with text labels, `<!-- waiting for real data -->` comments, and clear "product image pending" markers rather than invented content.
+
+    ```html
+    <!--
+    Assumptions:
+    - Audience: [description]
+    - Tone: [interpretation, e.g. "professional but not stiff"]
+    - Main flow: A → B → C
+    - Colors: brand blue + warm grey, accent TBD
+
+    Open questions:
+    - Step 3 data source? Using placeholder for now.
+    - Hero: abstract geometry or real photo? Placeholder for now.
+
+    If the direction looks wrong here, this is the cheapest moment to say so.
+    -->
+
+    <section class="hero">
+      <h1>[Main headline — awaiting copy]</h1>
+      <p>[Subheadline]</p>
+      <div class="cta-placeholder">[CTA button]</div>
+    </section>
+    ```
+
+    🛑 **Checkpoint 3:** Save and show this skeleton to the user. Wait for feedback before writing full components.
+  </Step>
+
+  <Step title="Full pass — fill placeholders, build variations">
+    With the direction confirmed, replace placeholders with real components. Build 3+ variations across distinct dimensions (visual / interaction / color / layout), using `design_canvas.jsx` for static comparisons or Tweaks for interactive switching. Show progress at the halfway point — do not wait until everything is complete.
+  </Step>
+
+  <Step title="Verify">
+    Run a Playwright screenshot and check the browser console for errors. Fix any interaction bugs before delivery.
+
+    🛑 **Checkpoint 4:** Open the output in a real browser and do a visual pass before handing off.
+  </Step>
+
+  <Step title="Summarize — concisely">
+    Write a minimal summary: only caveats (what is placeholder, what data is fake) and next steps (what the user should do or request). Do not recap every design decision or enumerate technical choices.
+  </Step>
+
+  <Step title="Export video (animation tasks — default on)">
+    For animation deliverables, the default output is an MP4 with audio, not a silent screen recording. Run `scripts/render-video.js` for the base 25fps MP4, `scripts/convert-formats.sh` to derive 60fps MP4 and palette-optimized GIF, and `scripts/add-music.sh` to add BGM. Add SFX according to `references/audio-design-rules.md`. Verify with `ffprobe -select_streams a` that an audio stream is present before calling the output final. Skip audio only when the user explicitly requests it.
+  </Step>
+
+  <Step title="Expert review (optional)">
+    If the user asks for a review, or if you have doubts about the output quality, run the 5-dimension critique from `references/critique-guide.md`: philosophical consistency / visual hierarchy / detail execution / functionality / originality — each scored 0–10. Output a total score, Keep list, Fix list (severity: ⚠️ fatal / ⚡ important / 💡 optimization), and three Quick Wins that can be done in under 5 minutes.
+  </Step>
+</Steps>

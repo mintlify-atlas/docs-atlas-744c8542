@@ -1,0 +1,142 @@
+---
+title: "Build interactive prototypes with device frames"
+description: "Create pixel-accurate iOS, Android, macOS, and web prototypes as single-file HTML with real device bezels, state navigation, and Playwright verification."
+---
+
+Huashu-Design produces high-fidelity app prototypes as self-contained HTML files — no build tools, no servers, no install step. Every iPhone mockup uses a calibrated device frame component for precise bezels, Dynamic Island, status bar, and Home Indicator geometry. Before delivery, a Playwright click test verifies that navigation, detail transitions, and tab switches all work correctly.
+
+## Delivery modes
+
+Multi-screen prototypes have two standard shapes. Choose before you start — they are architecturally different.
+
+| Mode | When to use | What gets built |
+|------|-------------|-----------------|
+| **Overview (flat layout)** | Design review, layout audit, side-by-side comparison | All screens rendered simultaneously, each in its own `IosFrame`, no interactivity required |
+| **Flow demo (single phone)** | Demonstrating a specific user journey — onboarding, purchase, detail drill-down | One `IosFrame` housing an `AppPhone` state machine; buttons, tab bars, and annotation points are all clickable |
+
+### Routing keywords
+
+The task description determines which mode to use:
+
+| Keywords in the request | Mode |
+|-------------------------|------|
+| `overview` · `show all screens` · `比较` · `展示所有页面` · `look at all` | Overview |
+| `demo the flow` · `clickable` · `走一遍` · `用户路径` · `演示流程` | Flow demo |
+| Ambiguous | Ask — do not default to flow demo (it costs more to build) |
+
+## Architecture choice: single-file vs multi-file
+
+All prototype HTML defaults to **single-file inline React**: all JSX, data, and styles live inside one `<script type="text/babel">` block.
+
+<Warning>
+Never use `<script src="components.jsx">` for local component files. The `file://` protocol treats external scripts as cross-origin and blocks them. Users would need to run an HTTP server — which breaks the "double-click to open" prototype contract.
+</Warning>
+
+<Tabs>
+  <Tab title="Single-file (default)">
+    One `.html` file, double-click to open. Use for 4–6 screens built by one person.
+
+    Any local images must be base64-inlined as data URLs — never referenced as relative file paths.
+  </Tab>
+  <Tab title="Multi-file + server">
+    `components.jsx` + `data.js` imported by `index.html`. Use only when the file exceeds ~1 000 lines and becomes hard to maintain. Always ship a startup command (`python3 -m http.server 8080`) with the delivery.
+  </Tab>
+  <Tab title="Multi-HTML + iframe">
+    Each screen is its own standalone HTML file; `index.html` assembles them with iframes. Use when multiple agents work in parallel on different screens.
+  </Tab>
+</Tabs>
+
+## The `IosFrame` component
+
+The `assets/ios_frame.jsx` file contains a pre-calibrated iPhone 15 Pro shell (393×852 logical pixels). It handles Dynamic Island (124×36 px, centered, top: 12 px), status bar time/signal/battery icons with correct island clearance, content area top padding, and the Home Indicator.
+
+<Warning>
+Never hand-code `.dynamic-island`, `.status-bar`, `.home-indicator`, or the bezel border in your own HTML. Custom implementations collide with the fixed 124×36 island geometry and produce layout bugs on the first line of app content.
+</Warning>
+
+**Three-step usage rule:**
+
+<Steps>
+  <Step title="Read the source">
+    Read `assets/ios_frame.jsx` to get the full `iosFrameStyles` constant and `IosFrame` component definition.
+  </Step>
+  <Step title="Inline the component">
+    Paste the entire `iosFrameStyles` constant and `IosFrame` function into your HTML's `<script type="text/babel">` block.
+  </Step>
+  <Step title="Wrap your screen">
+    Wrap your app screen component in `<IosFrame>`. Content renders from `top: 54px` downward — the status bar and Dynamic Island are already placed above it.
+  </Step>
+</Steps>
+
+```jsx
+// From assets/ios_frame.jsx — paste iosFrameStyles + IosFrame into your script, then:
+
+<IosFrame time="9:41" battery={85}>
+  <YourScreen />  {/* content starts at top: 54px — island/status bar already handled */}
+</IosFrame>
+```
+
+The component accepts `width`, `height`, `darkMode`, and `showKeyboard` props for customization without touching any island geometry.
+
+### Overview layout skeleton
+
+```jsx
+<div style={{display: 'flex', gap: 32, flexWrap: 'wrap', padding: 48, alignItems: 'flex-start'}}>
+  {screens.map(s => (
+    <div key={s.id}>
+      <div style={{fontSize: 13, color: '#666', marginBottom: 8, fontStyle: 'italic'}}>{s.label}</div>
+      <IosFrame>
+        <ScreenComponent data={s} />
+      </IosFrame>
+    </div>
+  ))}
+</div>
+```
+
+### Flow demo skeleton
+
+```jsx
+function AppPhone({ initial = 'today' }) {
+  const [screen, setScreen] = React.useState(initial);
+  const [modal, setModal] = React.useState(null);
+  // Render different ScreenComponents based on `screen`
+  // Pass onEnter / onClose / onTabChange / onOpen as props — never hardcode state
+}
+```
+
+Screen components receive callback props (`onEnter`, `onClose`, `onTabChange`, `onOpen`, `onAnnotation`). Every tappable element gets `cursor: pointer` and a hover feedback style.
+
+## Real images — not placeholders
+
+App prototypes need real visual content to be convincing. Before falling back to placeholder cards, pull images from:
+
+| Content type | Primary source |
+|--------------|----------------|
+| Art, museums, history | Wikimedia Commons (public domain), Met Museum Open Access |
+| General photography | Unsplash, Pexels |
+| User's own assets | `~/Downloads`, project `_archive/` |
+
+Use SVG placeholders only when all real-image channels have been exhausted or copyright is unclear.
+
+## Playwright verification
+
+Static screenshots reveal layout; click paths reveal interaction bugs. Run these three checks before delivery:
+
+<Steps>
+  <Step title="Enter detail view">
+    Click a list item or card and confirm the detail screen renders without console errors.
+  </Step>
+  <Step title="Hit a key annotation point">
+    Trigger any labeled callout, tooltip, or annotation marker.
+  </Step>
+  <Step title="Switch tabs">
+    Tap each tab bar item and confirm the correct screen appears.
+  </Step>
+</Steps>
+
+```bash
+# Run with global Playwright install
+npx playwright screenshot file:///absolute/path/to/prototype.html out.png --viewport-size=430,932
+```
+
+Confirm `pageerror` count is zero before sending the file to the user.

@@ -1,0 +1,231 @@
+---
+title: "Brand asset protocol: build with real brand identity"
+description: "The 5-step mandatory protocol for any task involving a specific brand — covering logo, product shots, UI screenshots, colors, and fonts."
+---
+
+The most common way an AI-generated design fails to represent a brand is not wrong colors — it is the complete absence of the brand's logo, product images, and interface screenshots. Those assets are how a brand gets recognized. Colors and fonts are supporting cast. When a design task involves a specific brand, Huashu Design runs a mandatory 5-step asset protocol before writing any code. This protocol is what separates a 90-point deliverable from a 40-point one. Skipping any step is what produced the real failure cases documented below.
+
+## When this protocol triggers
+
+The protocol is mandatory whenever the task names a specific brand, product, or client — Stripe, Linear, DJI, Anthropic, Notion, a user's own company, or any other named entity — regardless of whether the user has proactively supplied brand materials.
+
+**Prerequisite:** Before running the protocol, verify that the product exists and its status is known (Core Principle #0 — fact verification before assumption). If you are not certain whether a product has been released or what version it is, run a `WebSearch` first. A wrong assumption about the product contaminates every step that follows.
+
+## Asset importance ranking
+
+**Brand identity is about being recognized.** Recognition comes from assets in this order:
+
+| Asset type | Recognition contribution | Required for |
+|---|---|---|
+| **Logo** | Highest — any brand is identified on sight from its logo | Every brand, no exceptions |
+| **Product images / renders** | Very high — for physical products, the product itself is the main character | All hardware, packaging, and consumer goods |
+| **UI screenshots / interface assets** | Very high — for digital products, the interface is the main character | All apps, websites, and SaaS products |
+| **Color values** | Medium — supports recognition but looks generic without the above | Supplementary |
+| **Fonts** | Low — builds identity only alongside the above | Supplementary |
+| **Tone keywords** | Low — useful for agent self-checking | Supplementary |
+
+Extracting only colors and fonts while skipping the logo, product images, and UI screenshots violates this protocol. Using CSS silhouettes or hand-drawn SVGs in place of real product images also violates it.
+
+## The 5-step protocol
+
+<Steps>
+
+### Ask — request the full asset checklist at once
+
+Do not ask "do you have brand guidelines?" — that is too vague. Users do not know what to provide. Ask for each asset type explicitly, in priority order:
+
+```
+Regarding <brand/product>, which of the following do you have?
+Listed by priority:
+
+1. Logo (SVG or high-res PNG) — required for any brand
+2. Product images / official renders — required for physical products
+3. UI screenshots / interface assets — required for digital products
+4. Color values (HEX / RGB / brand palette)
+5. Font list (Display / Body)
+6. Brand guidelines PDF / Figma design system / official brand site URL
+
+Send whatever you have and I will source the rest.
+```
+
+### Search official channels (by asset type)
+
+If the user does not supply an asset, search official sources before proceeding. Each asset type has its own search path:
+
+| Asset | Search path |
+|---|---|
+| **Logo** | `<brand>.com/brand`, `<brand>.com/press`, `<brand>.com/press-kit`, `brand.<brand>.com`, or the homepage HTML for an inline SVG |
+| **Product images / renders** | Product detail page hero images and galleries, official press kits, official YouTube launch film frames |
+| **UI screenshots** | App Store / Google Play product page, official website screenshots section, product demo video frames |
+| **Colors** | Official website inline CSS, Tailwind config, brand guidelines PDF |
+| **Fonts** | `<link rel="stylesheet">` references in the official site HTML, Google Fonts tracking, brand guidelines |
+
+`WebSearch` fallback keywords: `<brand> logo download SVG`, `<brand> press kit`, `<brand> <product> official renders`, `<brand> app screenshots`.
+
+### Download assets — three fallback paths per type
+
+<Accordion title="Logo (required for every brand)">
+
+Three paths in order of success rate:
+
+1. **Direct SVG/PNG file** (ideal): `curl -o assets/<brand>-brand/logo.svg https://<brand>.com/logo.svg`
+2. **Extract inline SVG from homepage HTML** (works in ~80% of cases): Download the full homepage HTML and extract the `<svg>...</svg>` logo node
+3. **Official social media avatar** (last resort): GitHub / Twitter / LinkedIn company avatars are typically 400×400 or 800×800 transparent PNG
+
+If no logo can be found after all three paths: **stop and ask the user**. Do not proceed without a logo. A logo is the foundation of brand recognition.
+
+</Accordion>
+
+<Accordion title="Product images / renders (required for physical products)">
+
+In order of priority:
+
+1. **Official product page hero image** — right-click to find the URL, or `curl` it. Usually 2000px or wider.
+2. **Official press kit** — `<brand>.com/press` frequently has high-resolution product image downloads.
+3. **Official launch video frame** — use `yt-dlp` to download the YouTube video, then `ffmpeg` to extract frames.
+4. **Wikimedia Commons** — public domain assets are often available here.
+5. **AI generation** (last resort) — use nano-banana-pro with an official reference image as the base. Do not use CSS silhouettes or hand-drawn SVGs as a substitute.
+
+If no product image can be found: prioritize AI generation from an official reference, then ask the user, then use an honest placeholder (grey block with "product image pending" label).
+
+</Accordion>
+
+<Accordion title="UI screenshots (required for digital products)">
+
+- App Store / Google Play product page screenshots (note: may be mockups, not real UI — compare carefully)
+- Official website screenshots section
+- Product demo video frames
+- Official Twitter/X launch screenshots (often the most current version)
+- The user's own account screenshot if they have access
+
+If no UI screenshots can be found: ask the user to screenshot their own account, or extract frames from an official demo video. Do not use mockup generators as a substitute.
+
+</Accordion>
+
+<Accordion title="Color values">
+
+Extract from real source files rather than guessing:
+
+```bash
+grep -hoE '#[0-9A-Fa-f]{6}' assets/<brand>-brand/*.{svg,html,css} \
+  | sort | uniq -c | sort -rn | head -20
+```
+
+Filter out black and white. Watch for demo-brand pollution: if a product screenshot shows another brand's colors (e.g., a tool screenshot demoing a red brand), those colors belong to the demo brand, not the product being designed for. When two strong colors appear simultaneously, identify which belongs to which.
+
+Also note that a brand's marketing site colors and its product UI colors are often different — Lovart's marketing site is warm beige and orange, while its product UI is charcoal and lime. Both are valid; choose the one that matches the deliverable context.
+
+</Accordion>
+
+<Accordion title="Fonts">
+
+Check the official website's `<link rel="stylesheet">` tags for Google Fonts references, or look for font declarations in the brand guidelines. Record both Display and Body font stacks in `brand-spec.md`.
+
+</Accordion>
+
+### Verify and extract — confirm each asset is usable
+
+| Asset | Verification checklist |
+|---|---|
+| **Logo** | File exists + SVG/PNG opens correctly + at least two versions (dark background / light background) + transparent background |
+| **Product images** | At least one image ≥ 2000px + clean or removed background + multiple angles (hero, detail, scene) |
+| **UI screenshots** | True resolution (1x or 2x) + current version (not outdated) + no user data visible |
+| **Color values** | Extracted from real files, filtered for brand colors (not black/white/grey), demo brand pollution removed |
+
+### Record everything in brand-spec.md
+
+Write a `brand-spec.md` file that covers all asset types. All subsequent HTML files must reference the asset file paths recorded here — no CSS silhouettes, no re-drawn logos, no invented color values.
+
+```markdown
+# <Brand> · Brand Spec
+> Collection date: YYYY-MM-DD
+> Asset sources: <list download sources>
+> Asset completeness: <Complete / Partial / Inferred>
+
+## Core assets (first-class citizens)
+
+### Logo
+- Primary: `assets/<brand>-brand/logo.svg`
+- Light-background reverse: `assets/<brand>-brand/logo-white.svg`
+- Usage: <intro / outro / corner watermark / global>
+- Prohibited transforms: <no stretching / recoloring / stroke>
+
+### Product images (physical products)
+- Hero angle: `assets/<brand>-brand/product-hero.png` (2000×1500)
+- Detail: `assets/<brand>-brand/product-detail-1.png`
+- Scene: `assets/<brand>-brand/product-scene.png`
+- Usage: <close-up / rotation / comparison>
+
+### UI screenshots (digital products)
+- Home: `assets/<brand>-brand/ui-home.png`
+- Core feature: `assets/<brand>-brand/ui-feature-<name>.png`
+- Usage: <product showcase / dashboard reveal / comparison>
+
+## Supplementary assets
+
+### Color palette
+- Primary: #XXXXXX  <source>
+- Background: #XXXXXX
+- Ink: #XXXXXX
+- Accent: #XXXXXX
+- Prohibited colors: <colors the brand explicitly avoids>
+
+### Typography
+- Display: <font stack>
+- Body: <font stack>
+- Mono (data HUD): <font stack>
+
+### Signature details
+- <which details get the 120% treatment>
+
+### Prohibited
+- <explicit don'ts: e.g. Lovart never uses blue, Stripe avoids low-saturation warm tones>
+
+### Tone keywords
+- <3–5 adjectives>
+```
+
+CSS variables must be injected from the spec:
+
+```css
+:root {
+  --brand-primary: #XXXXXX;
+  --brand-bg: #XXXXXX;
+  --brand-ink: #XXXXXX;
+  --brand-accent: #XXXXXX;
+}
+```
+
+</Steps>
+
+## The 5-10-2-8 quality threshold
+
+<Warning>
+**Logo is exempt from this rule — it must always be used if it exists.** The 5-10-2-8 rule applies to all other assets: product images, UI screenshots, and reference materials.
+
+- **5 search rounds:** Cross multiple channels (official site, press kit, official social media, YouTube frames, Wikimedia, user screenshots). Do not stop after the first page of results.
+- **10 candidates:** Collect at least 10 options before starting to filter.
+- **Select 2:** From the 10 candidates, choose the 2 best for final use.
+- **Each must score 8/10 or higher:** Scoring dimensions are resolution (≥ 2000px), rights clarity (official source preferred), brand tone alignment, consistency between the 2 selected images, and independent narrative ability (each asset tells a story by itself, not just decoration). A 7/10 asset is a deduction on the final design — leave it out rather than pad the count.
+
+A mediocre asset is worse than no asset. It dilutes visual quality and signals unprofessionalism. The principle: **rarity over abundance**.
+</Warning>
+
+## Real failure cases
+
+These cases from the project's history are what drove the protocol upgrade to its current form.
+
+**Kimi orange vs. blue:** The agent recalled Kimi's brand color as orange from training data. Kimi's actual primary color is `#1783FF` blue. The entire animation had to be redone.
+
+**Lovart demo-brand pollution:** A Lovart product screenshot showed a demo brand with a red accent. The agent mistook that red for Lovart's own brand color. The design nearly shipped with the wrong identity.
+
+**DJI Pocket 4 — the case that triggered this protocol's upgrade (2026-04-20):** The agent ran an earlier version of the protocol that only extracted color values and fonts, and skipped downloading the DJI logo and Pocket 4 product images. CSS silhouettes were used in their place. The result was a generic dark-background + orange-accent tech animation with zero DJI recognition. The project owner's exact words: "Otherwise, what are we even expressing?" The protocol was upgraded to its current form the same day.
+
+## Protocol cost vs. skipping cost
+
+| Scenario | Time |
+|---|---|
+| Running the full protocol correctly | Download logo (5 min) + download 3–5 product images / UI screenshots (10 min) + extract colors (5 min) + write brand-spec.md (10 min) = **~30 minutes** |
+| Skipping the protocol | Produce a generic animation with no brand recognition → user requests full redo → **1–2 hours of rework** |
+
+For commercial work, launch events, and important client projects, the 30-minute protocol is the cheapest insurance available.

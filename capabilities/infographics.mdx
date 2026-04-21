@@ -1,0 +1,149 @@
+---
+title: "Build print-quality infographics and data visualizations"
+description: "Create magazine-grade infographics with CSS Grid, text-wrap: pretty, and real data — then export to vector PDF, 300dpi PNG, or SVG."
+---
+
+Huashu-Design treats infographics as editorial artifacts: every element must earn its place, data must be verified before it enters the layout, and typography must work at both screen resolution and print scale. The output is a single HTML file that renders at publication quality and exports to vector PDF, high-resolution PNG, or SVG without changing the source.
+
+## Layout: CSS Grid for precise column control
+
+CSS Grid is the primary layout tool. It maps directly to traditional print column systems — sidebars, data panels, and full-bleed sections all emerge from a single `grid-template-columns` declaration.
+
+```css
+.infographic {
+  display: grid;
+  grid-template-columns: 2fr 1fr;  /* Main content + sidebar */
+  grid-template-rows: auto;
+  gap: 48px;
+  padding: 80px;
+  max-width: 1200px;
+}
+
+.full-bleed {
+  grid-column: 1 / -1;  /* Span all columns */
+}
+
+.data-panel {
+  grid-column: 2;        /* Pin to sidebar column */
+  grid-row: 1 / 3;       /* Span multiple rows */
+}
+```
+
+Avoid `position: absolute` for content placement. Absolute positioning breaks reflow when content length changes and prevents clean PDF export.
+
+## Typography: readable, not decorative
+
+Good infographic typography is invisible — it guides the reader without announcing itself.
+
+```css
+body {
+  font-family: 'Source Serif 4', 'EB Garamond', Georgia, serif;  /* Editorial anchor */
+  font-size: 16px;
+  line-height: 1.6;
+  text-wrap: pretty;     /* Prevent orphaned words at line end */
+  hanging-punctuation: first last;
+}
+
+h1, h2, h3 {
+  font-family: 'Instrument Serif', 'Newsreader', serif;
+  text-wrap: balance;    /* Balanced headline line lengths */
+  letter-spacing: -0.02em;
+}
+
+.caption {
+  font-size: 13px;
+  color: oklch(45% 0 0);
+  font-variant-numeric: tabular-nums;  /* Aligned numbers in data tables */
+}
+```
+
+<Warning>
+Do not use Inter, Roboto, Arial, or system fonts as display faces. These are the most common AI-generated defaults and carry no editorial character. They signal "demo page" rather than "designed artifact."
+</Warning>
+
+Use `text-wrap: pretty` on all body text. It prevents single-word last lines (orphans) with no additional markup required.
+
+## Color: define in oklch()
+
+Define all infographic colors in `oklch()`. The perceptual uniformity of the OKLCh color space means that colors at the same lightness level will appear visually equal in weight — critical for data series where each category should read as equally prominent.
+
+```css
+:root {
+  --ink:       oklch(18% 0.01 250);
+  --paper:     oklch(97% 0.005 80);
+  --accent:    oklch(55% 0.18 35);    /* Warm rust — single accent */
+  --data-1:    oklch(60% 0.15 200);
+  --data-2:    oklch(60% 0.15 140);
+  --data-3:    oklch(60% 0.15 30);
+  --muted:     oklch(70% 0.02 250);
+}
+```
+
+Use one accent color throughout the infographic. Multiple accent colors are appropriate only when the data has genuine categorical distinctions that require visual separation.
+
+## Data integrity
+
+<Warning>
+Never fabricate statistics, invent percentages, or use decorative numbers. A figure placed in an infographic acquires authority simply by being typeset — even if marked as illustrative. If real data is not available, use a labeled placeholder and note the source needed.
+</Warning>
+
+Rules for data in infographics:
+
+- Every number must have a traceable source; add a source line at the bottom of the panel
+- Round numbers (50%, 3×, "doubling") are acceptable only if they accurately reflect the source data
+- Do not add decimal precision to round figures to make them look more authoritative
+- If a data point cannot be verified, mark it clearly: "Source needed" or "Estimated"
+
+The "earn your place" principle applies to data as much as to visual elements: a chart that illustrates a point the text already makes adds nothing. Include data visualizations only when they reveal a pattern or relationship that prose cannot convey efficiently.
+
+## The "earn your place" principle
+
+Every element in the layout must actively contribute to the reader's understanding. Remove anything that does not:
+
+- State information the reader needs
+- Establish hierarchy that helps the reader navigate
+- Create visual rhythm that reduces cognitive load
+
+Elements that commonly fail this test:
+
+| Element | When it fails |
+|---------|---------------|
+| Background pattern | When it adds visual noise without semantic meaning |
+| Decorative icon | When it illustrates a concept already stated in the adjacent text |
+| Stat callout | When the number is restated from the body copy with no added context |
+| Divider line | When adjacent elements have sufficient whitespace separation already |
+
+Empty space is a design decision, not a problem to fill. If a section feels sparse, the solution is restructuring the grid or scaling the typography — not adding filler elements.
+
+## Export formats
+
+All three formats are derived from the same HTML source without modification.
+
+<Tabs>
+  <Tab title="Vector PDF">
+    Preserves text as selectable, searchable vector outlines. Best for print, archiving, and email delivery.
+
+    ```bash
+    node scripts/export_deck_pdf.mjs --slides . --out infographic.pdf
+    ```
+
+    Dependencies: `npm install playwright pdf-lib`
+  </Tab>
+  <Tab title="PNG at 300dpi">
+    For print production requiring raster output. Playwright renders at device pixel ratio 3 to approximate 300dpi at standard screen dimensions.
+
+    ```bash
+    npx playwright screenshot file:///path/to/infographic.html \
+      out.png \
+      --viewport-size=1200,1600 \
+      --device-scale-factor=3
+    ```
+
+    Check the output pixel dimensions: a 1200px wide viewport at 3× produces a 3600px wide PNG, which prints at 300dpi on a 12-inch wide page.
+  </Tab>
+  <Tab title="SVG">
+    For web embedding where the graphic must scale to any viewport. Export by wrapping the infographic content in an `<svg>` element with `viewBox` set to the design's intrinsic dimensions, or use Playwright's `page.evaluate()` to serialize the rendered DOM to SVG.
+
+    SVG is most reliable when the infographic is built with `<svg>` data chart primitives rather than HTML/CSS layout. CSS Grid layouts do not serialize cleanly to SVG.
+  </Tab>
+</Tabs>

@@ -1,0 +1,120 @@
+---
+title: "Design direction advisor: pick a philosophy, not a style"
+description: "How the fallback mode works when briefs are vague: 5 schools, 20 philosophies, 3 differentiated direction recommendations with live demos."
+---
+
+When a brief says "make something nice" or "I'm not sure what style I want," the worst response is to pick a direction based on generic AI instinct and start building. That approach produces exactly the kind of undifferentiated output that the anti-AI-slop rules are designed to prevent. Huashu Design's Design Direction Advisor mode is the structured alternative: a deliberate process for surfacing what a piece should feel like, recommending three philosophically distinct directions, showing real examples, and generating live demos — before any production work begins.
+
+## When to trigger this mode
+
+**Trigger when:**
+- The brief is vague: "make something nice," "help me design," "what style should I use," "do something for X" with no specific reference
+- The user explicitly asks for style recommendations, direction options, or a design philosophy
+- The project has no design context at all — no design system, no brand reference, no existing assets
+- The user says "I don't know what I want"
+
+**Skip when:**
+- The user has provided a clear style reference (Figma file, screenshot, or brand spec) — go directly to Core Philosophy #1
+- The user has stated a specific direction ("make an Apple Silicon-style launch animation") — go directly to the Junior Designer flow
+- The task is a small fix or a specific tool invocation ("convert this HTML to PDF")
+
+When in doubt, use the lightest version: list three differentiated directions and let the user choose, without expanding or generating demos. Respect the user's pace.
+
+## The 5 schools of design
+
+Every recommendation must draw from this taxonomy. Understanding the visual character of each school is what makes differentiated recommendations possible.
+
+| School | Visual character | Best used as |
+|---|---|---|
+| **Information Architecture** (01–04) | Rational, data-driven, restrained. Grid logic, typographic hierarchy, minimal decoration. | The safe / professional option |
+| **Motion Poetry** (05–08) | Kinetic, immersive, technical aesthetics. Time as a design dimension. Depth and layering. | The bold / avant-garde option |
+| **Minimalism** (09–12) | Order, negative space, refinement. Every element earns its place. High material quality. | The safe / premium option |
+| **Experimental Avant-Garde** (13–16) | Pioneer, generative art, visual impact. Rules are starting points. Unexpected compositions. | The bold / innovative option |
+| **Eastern Philosophy** (17–20) | Warmth, poetry, contemplation. Ink and space as narrative. Indirect expression. | The differentiated / unique option |
+
+<Tip>
+**The differentiation rule (mandatory):** The three recommended directions must come from three different schools. Recommending two directions from the same school gives the user options that look too similar to distinguish. Three schools = three genuinely different visual worlds to choose from. Never recommend more than one direction from the same school.
+</Tip>
+
+The full library of 20 named philosophies with AI prompt templates is in `references/design-styles.md`. Representative designers and studios include Pentagram (information architecture), Field.io (motion poetry), Kenya Hara (Eastern minimalism), and Stefan Sagmeister (experimental avant-garde).
+
+## The 8-phase flow
+
+<Steps>
+  <Step title="Phase 1 — Understand the brief deeply">
+    Ask at most three focused questions: target audience, core message, emotional register, and output format. If the brief is already clear, skip this phase.
+  </Step>
+
+  <Step title="Phase 2 — Consultant restatement (100–200 words)">
+    Restate the brief in your own words: the underlying need, the audience, the context, the emotional register. Close with: "Based on this understanding, I have prepared three design directions for you." This restatement confirms alignment before any direction is invested in.
+  </Step>
+
+  <Step title="Phase 3 — Recommend 3 differentiated design philosophies">
+    Each recommendation must include:
+    - A **named designer or studio** (e.g., "Kenya Hara-style Eastern minimalism" — not just "minimalism")
+    - A 50–100 word explanation of why this designer's philosophy fits the specific brief
+    - 3–4 defining visual characteristics
+    - 3–5 tone keywords
+    - Optional: a representative work reference
+
+    The three directions must come from three different schools (see the differentiation rule above).
+  </Step>
+
+  <Step title="Phase 4 — Show the prebuilt showcase gallery">
+    After presenting the three directions, immediately check `assets/showcases/INDEX.md` for pre-built samples matching the scene type. The gallery contains 24 pre-built samples across 8 scene types × 3 styles:
+
+    | Scene | Directory |
+    |---|---|
+    | WeChat cover image | `assets/showcases/cover/` |
+    | Presentation data slide | `assets/showcases/ppt/` |
+    | Vertical infographic | `assets/showcases/infographic/` |
+    | Personal homepage | `assets/showcases/website-personal/` |
+    | AI navigation site | `assets/showcases/website-ai-nav/` |
+    | AI writing tool | `assets/showcases/website-ai-writing/` |
+    | SaaS product | `assets/showcases/website-saas/` |
+    | Developer documentation | `assets/showcases/website-devdocs/` |
+
+    Present these with: "Before launching live demos, here is how these three styles look in a similar scene →" then read the relevant `.png` files.
+  </Step>
+
+  <Step title="Phase 5 — Generate 3 live visual demos">
+    **Seeing beats describing.** Don't make the user imagine styles from text descriptions — show them.
+
+    Generate one demo per direction using the user's real content and theme (not Lorem ipsum):
+
+    - Store HTML at `_temp/design-demos/demo-[style-name].html`
+    - Screenshot with: `npx playwright screenshot file:///path.html out.png --viewport-size=1200,900`
+    - Present all three screenshots together after all demos are complete
+
+    If the current agent supports parallel subagents, launch all three as parallel background tasks. If not, generate them serially — both approaches work equally well.
+
+    | Style path | Demo generation method |
+    |---|---|
+    | HTML-type styles | Generate complete HTML → screenshot |
+    | AI-generation-type styles | Use nano-banana-pro with style DNA + content description |
+    | Hybrid styles | HTML layout + AI illustration |
+  </Step>
+
+  <Step title="Phase 6 — User chooses">
+    The user selects one direction to develop, or:
+    - Mixes directions ("the color palette from A with the layout from C")
+    - Asks for micro-adjustments to a direction
+    - Rejects all three and requests new directions → return to Phase 3
+  </Step>
+
+  <Step title="Phase 7 — Generate the AI prompt">
+    Structure: `[design philosophy constraints] + [content description] + [technical parameters]`
+
+    - Use specific visual characteristics, not style names — write "Kenya Hara's negative space treatment + terracotta orange #C04A1A", not "minimalist"
+    - Include color HEX values, proportions, spatial allocation, and output dimensions
+    - Avoid all patterns from the anti-AI-slop checklist
+  </Step>
+
+  <Step title="Phase 8 — Enter the main production flow">
+    With a confirmed direction and real design context in hand, return to the Junior Designer workflow (Core Philosophy + Standard Workflow). The design direction advisor mode has done its job: what was a vague brief is now a specific, philosophically grounded starting point.
+  </Step>
+</Steps>
+
+## Handling personal projects with real assets
+
+When the task involves the user's own product or person, check the private memory path for `personal-asset-index.json` (Claude Code default: `~/.claude/memory/`; other agents follow their own conventions). On first use, copy `assets/personal-asset-index.example.json` to that path and fill in real data. If the file does not exist, ask the user directly — do not invent personal assets.

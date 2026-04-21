@@ -1,0 +1,89 @@
+---
+title: "What Huashu Design produces: full capabilities"
+description: "A complete overview of what Huashu Design produces: prototypes, slide decks, motion animations, infographics, design critiques, and more."
+---
+
+Huashu Design covers seven distinct design disciplines, each producing a finished, deliverable file. The underlying principle is the same across all of them: the agent embodies the relevant specialist — prototype engineer, motion designer, slide designer, or design critic — rather than producing generic AI output.
+
+## Capability categories
+
+<CardGroup cols={2}>
+
+<Card title="Interactive prototype" icon="mobile-screen">
+  Single-file HTML with a pixel-accurate iPhone 15 Pro bezel, state-driven multi-screen navigation, real images from Wikimedia/Met/Unsplash, and Playwright click tests run before delivery. **Typical time: 10–15 min.**
+</Card>
+
+<Card title="Slide decks" icon="presentation-screen">
+  An HTML deck sized for browser presentation plus an editable PPTX export. The PPTX uses real text frames — not image-embedded fakes — so slides remain editable after export. **Typical time: 15–25 min.**
+</Card>
+
+<Card title="Motion design" icon="film">
+  A Stage + Sprite timeline model drives MP4 export at 25 fps with optional 60 fps interpolation, a palette-optimized GIF, and a choice of six scene-specific background music tracks with automatic fade. **Typical time: 8–12 min.**
+</Card>
+
+<Card title="Design variations" icon="sliders">
+  Three or more side-by-side directions with live parameter switching via a Tweaks side panel. Colors, typography, and information density are parameterized and persist across reloads via `localStorage`. **Typical time: 10 min.**
+</Card>
+
+<Card title="Infographic / data viz" icon="chart-bar">
+  Print-quality typography using CSS Grid, `text-wrap: pretty`, and carefully chosen serif display faces. Driven by real data. Exports to vector PDF, 300 dpi PNG, and SVG. **Typical time: 10 min.**
+</Card>
+
+<Card title="Design direction advisor" icon="compass">
+  The fallback for vague briefs. Draws from 5 design schools × 20 philosophies to recommend 3 differentiated directions, each from a different school. Generates all 3 visual demos in parallel before you commit to one. **Typical time: 5 min.**
+</Card>
+
+<Card title="5-dimension expert critique" icon="star-half-stroke">
+  Scores a design across philosophical coherence, visual hierarchy, execution craft, functionality, and innovation — each 0–10. Outputs a radar chart plus a Keep / Fix / Quick Wins punch list. **Typical time: 3 min.**
+</Card>
+
+</CardGroup>
+
+## Huashu Design vs. Claude Design
+
+Both tools can produce high-fidelity design output. They occupy different positions in the workflow.
+
+| | Claude Design | Huashu Design |
+|---|---|---|
+| **Form** | Web product (used in the browser) | Skill (used inside Claude Code) |
+| **Quota** | Subscription quota | API usage — parallel agents unblocked |
+| **Output formats** | Canvas + Figma export | HTML / MP4 / GIF / editable PPTX / PDF |
+| **Interaction model** | GUI (click, drag, edit) | Conversation (describe, wait, receive file) |
+| **Complex animation** | Limited | Stage + Sprite timeline · 60 fps export |
+| **Agent compatibility** | Claude.ai only | Claude Code, Cursor, Trae, Hermes, OpenClaw |
+
+Claude Design is a better graphics tool. Huashu Design makes the graphics-tool layer disappear. The two serve different audiences.
+
+## What keeps outputs non-generic
+
+### Anti-AI-slop philosophy
+
+The skill explicitly avoids the visual common denominator of AI output: purple gradients, emoji icons, rounded-corner + left-border accent boxes, SVG human silhouettes, and Inter used as a display face. Instead it uses `text-wrap: pretty`, CSS Grid, oklch color values, and carefully chosen serif display faces.
+
+### Core Asset Protocol
+
+When a task involves a specific brand, the skill enforces a five-step hard process before any design work begins:
+
+1. Ask the user for a checklist of six asset types: logo, product shots, UI screenshots, color palette, fonts, and brand guidelines.
+2. Search official brand channels (`<brand>.com/brand`, press pages, product pages, launch films).
+3. Download assets with three fallback paths per asset type.
+4. Verify each asset — logo fidelity, image resolution, UI freshness — and extract real color hex values from the files rather than guessing.
+5. Write a `brand-spec.md` that freezes logo paths, product image paths, UI screenshot paths, and CSS variables for colors and fonts.
+
+The ranking of asset importance, from highest to lowest: logo (mandatory for any brand), product renders (mandatory for physical products), UI screenshots (mandatory for digital products), color values (auxiliary), fonts (auxiliary).
+
+Using only colors and fonts while skipping the logo and product imagery is a protocol violation. CSS silhouettes standing in for real product shots are also a violation.
+
+## Limitations
+
+<Warning>
+  **No layer-editable round-trip to Figma or Keynote.** Outputs are HTML files. They are screenshottable, recordable, and image-exportable, but you cannot drag elements into Keynote for text-position tweaks.
+</Warning>
+
+<Warning>
+  **Framer Motion-tier complexity is out of scope.** 3D rendering, physics simulation, and particle systems exceed the skill's boundaries.
+</Warning>
+
+<Warning>
+  **Brand-from-zero quality drops to roughly 60–65 points.** Producing hi-fi design without any existing brand context was always a last resort. The skill is an 80-point tool, not a 100-point product — but for anyone unwilling to open a graphical UI, an 80-point skill consistently beats a 100-point product they never open.
+</Warning>

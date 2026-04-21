@@ -1,0 +1,193 @@
+---
+title: "Generate design variations with live Tweaks panel"
+description: "Create 3+ parallel design variants across visual dimensions, then switch between them in real time using the Tweaks system with localStorage persistence."
+---
+
+Rather than delivering a single "final" design, Huashu-Design produces at least three variants in parallel — spanning different visual dimensions — so users can compare directions and mix-and-match. Two tools serve this workflow: `design_canvas.jsx` for static side-by-side review, and the Tweaks system for live parameter switching with persistent state.
+
+## Variation principle: from by-the-book to novel
+
+Variants must span meaningfully different territory. The three directions should come from three different design schools — never two variations on the same aesthetic.
+
+The progression moves from safe → differentiated → experimental:
+
+1. **By-the-book** — recognized conventions for the medium (clean, expected, professional)
+2. **Directional** — a clear aesthetic reference (Kenya Hara minimalism, Field.io motion poetry, editorial typography)
+3. **Novel** — something unexpected but coherent, not a template
+
+Users can select one direction, merge elements across directions ("A's palette + C's layout"), or ask for another round.
+
+## Dimensions to vary
+
+Produce variants across orthogonal axes, not small tweaks of the same design:
+
+| Dimension | Example contrast |
+|-----------|-----------------|
+| Visual style | Brutalist raw vs editorial refined vs spatial depth |
+| Color | Warm ochre + deep red vs cool slate + acid green vs near-monochrome |
+| Typography | Serif display + sans body vs all-caps condensed vs variable-weight optical size |
+| Layout | Single column flowing vs strict grid vs asymmetric tension |
+| Density | Minimal breathing room vs comfortable standard vs information-dense |
+| Animation | Subtle fade-in vs kinetic slide-in vs anticipation + spring |
+
+## `design_canvas.jsx` — static side-by-side comparison
+
+`DesignCanvas` renders variants in a labeled grid for design review. Each cell has a numbered label, an optional description, and click-to-expand behavior for closer inspection. The component is read from `assets/design_canvas.jsx` and inlined into your HTML.
+
+```jsx
+// From assets/design_canvas.jsx — paste DesignCanvas + Variation into your script
+
+<DesignCanvas
+  title="Hero Section — 3 directions"
+  subtitle="Click any variant to expand"
+  columns={3}
+>
+  <Variation label="Minimal" description="Information-first, generous whitespace">
+    <MinimalHero />
+  </Variation>
+  <Variation label="Editorial" description="Magazine-grade typographic tension">
+    <EditorialHero />
+  </Variation>
+  <Variation label="Spatial" description="Depth layers, parallax-ready">
+    <SpatialHero />
+  </Variation>
+</DesignCanvas>
+```
+
+`DesignCanvas` accepts `title`, `subtitle`, and `columns` (1–4). `Variation` accepts `label`, `description`, `number` (overrides auto-numbering), and `aspectRatio` (default `4 / 3`).
+
+The component keeps its own `expanded` state: clicking a variant opens it in a full-screen lightbox overlay. Clicking outside dismisses it.
+
+Full component source from `assets/design_canvas.jsx`:
+
+```jsx
+function DesignCanvas({ title, subtitle, columns = 3, children }) {
+  const [expanded, setExpanded] = React.useState(null);
+
+  const gridStyle = {
+    display: 'grid',
+    gap: 32,
+    gridTemplateColumns: `repeat(${columns}, 1fr)`,
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#F5F5F0', padding: '40px 60px' }}>
+      {(title || subtitle) && (
+        <div style={{ marginBottom: 48, maxWidth: 900 }}>
+          {title && <h1 style={{ fontSize: 36, fontWeight: 600, letterSpacing: '-0.02em' }}>{title}</h1>}
+          {subtitle && <p style={{ fontSize: 16, color: '#666' }}>{subtitle}</p>}
+        </div>
+      )}
+      <div style={gridStyle}>
+        {React.Children.map(children, (child, idx) =>
+          React.isValidElement(child)
+            ? React.cloneElement(child, {
+                _index: idx,
+                _expanded: expanded === idx,
+                _onToggle: () => setExpanded(expanded === idx ? null : idx),
+              })
+            : child
+        )}
+      </div>
+    </div>
+  );
+}
+
+if (typeof window !== 'undefined') {
+  Object.assign(window, { DesignCanvas, Variation });
+}
+```
+
+## Tweaks — live parameter switching
+
+The Tweaks system lets users flip between variants and adjust design parameters in real time without touching code. All state is saved to `localStorage` and survives page reloads.
+
+Use Tweaks when the design has interactive state, flows, or parameters that benefit from live experimentation — as opposed to static layout comparison.
+
+### Implementation
+
+```jsx
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "primaryColor": "#D97757",
+  "fontSize": 16,
+  "density": "comfortable",
+  "dark": false
+}/*EDITMODE-END*/;
+
+function useTweaks() {
+  const [tweaks, setTweaks] = React.useState(() => {
+    try {
+      const stored = localStorage.getItem('design-tweaks');
+      return stored ? { ...TWEAK_DEFAULTS, ...JSON.parse(stored) } : TWEAK_DEFAULTS;
+    } catch {
+      return TWEAK_DEFAULTS;
+    }
+  });
+
+  const update = (patch) => {
+    const next = { ...tweaks, ...patch };
+    setTweaks(next);
+    try { localStorage.setItem('design-tweaks', JSON.stringify(next)); } catch {}
+  };
+
+  const reset = () => {
+    setTweaks(TWEAK_DEFAULTS);
+    try { localStorage.removeItem('design-tweaks'); } catch {}
+  };
+
+  return { tweaks, update, reset };
+}
+```
+
+The `/*EDITMODE-BEGIN*/` and `/*EDITMODE-END*/` markers have no effect in the localStorage flow but enable source-level persistence in host environments that support it (such as Claude.ai Artifacts). Adding them costs nothing.
+
+### Consuming Tweaks in your design
+
+```jsx
+function App() {
+  const { tweaks } = useTweaks();
+
+  return (
+    <div style={{
+      '--primary': tweaks.primaryColor,
+      '--font-size': `${tweaks.fontSize}px`,
+      background: tweaks.dark ? '#0A0A0A' : '#FAFAFA',
+      color: tweaks.dark ? '#FAFAFA' : '#1A1A1A',
+    }}>
+      {/* Your design */}
+      <TweaksPanel />
+    </div>
+  );
+}
+```
+
+CSS references the injected custom properties:
+
+```css
+.cta-button {
+  background: var(--primary);
+  font-size: var(--font-size);
+}
+```
+
+### Tweaks panel defaults
+
+The panel lives at the bottom-right corner of the page, collapsed to a small button by default. It expands on click. Cap the panel at 5–6 controls — more than that turns it into a configuration screen rather than an exploration tool.
+
+Recommended controls by project type:
+
+| Project type | Useful tweaks |
+|--------------|---------------|
+| Any design | Primary color, font size, dark mode toggle |
+| Slide deck | Theme (light/dark/brand), font pairing, information density |
+| App prototype | Layout variant (A/B/C), interaction speed, mock data volume, UI state |
+| Landing page | Hero style, CTA copy variant, column structure |
+| Animation | Playback speed, loop mode, easing style |
+
+## When to use each tool
+
+| Tool | Best for |
+|------|----------|
+| `design_canvas.jsx` | Presenting multiple fully-realized directions for stakeholder review; no interactivity needed |
+| Tweaks | Exploring a single design's parameter space; user adjusts and reacts in real time |
+| Both together | Show three static canvas variants, then offer a Tweaks panel on the selected direction for fine-tuning |

@@ -1,0 +1,689 @@
+---
+title: "Design philosophy library: 20 styles across 5 schools"
+description: "The complete library of 20 design philosophies used by Huashu Design, organized by school with visual character, prompt DNA, and best-use scenarios."
+---
+
+Huashu Design draws on 20 documented design philosophies grouped into five schools. Each philosophy carries a distinct visual language, a prompt DNA you can paste directly into image generation tools, and a recommended execution path — HTML code, AI image generation, or a mixed approach. Use the summary table below to locate the right philosophy for your output type, then expand the relevant school for full details.
+
+## All 20 philosophies at a glance
+
+| # | Name | School | Best path | Web | PPT | PDF | Infographic | Cover |
+|---|------|--------|-----------|:---:|:---:|:---:|:-----------:|:-----:|
+| 01 | Pentagram / Bierut | Information Architecture | HTML | ★★★ | ★★★ | ★★☆ | ★★☆ | ★★★ |
+| 02 | Stamen Design | Information Architecture | Mixed | ★★☆ | ★★☆ | ★★☆ | ★★★ | ★★☆ |
+| 03 | Information Architects | Information Architecture | HTML | ★★★ | ★☆☆ | ★★★ | ★☆☆ | ★☆☆ |
+| 04 | Fathom | Information Architecture | HTML | ★★☆ | ★★★ | ★★★ | ★★★ | ★★☆ |
+| 05 | Locomotive | Motion Poetry | Mixed | ★★★ | ★★☆ | ★☆☆ | ★☆☆ | ★★☆ |
+| 06 | Active Theory | Motion Poetry | AI-generated | ★★★ | ★☆☆ | ★☆☆ | ★☆☆ | ★★☆ |
+| 07 | Field.io | Motion Poetry | AI-generated | ★★☆ | ★★☆ | ★☆☆ | ★★☆ | ★★★ |
+| 08 | Resn | Motion Poetry | AI-generated | ★★★ | ★☆☆ | ★☆☆ | ★☆☆ | ★★☆ |
+| 09 | Experimental Jetset | Minimalism | Mixed | ★★☆ | ★★☆ | ★★☆ | ★★☆ | ★★★ |
+| 10 | Müller-Brockmann | Minimalism | HTML | ★★☆ | ★★★ | ★★★ | ★★★ | ★★☆ |
+| 11 | Build | Minimalism | HTML | ★★★ | ★★★ | ★★☆ | ★☆☆ | ★★★ |
+| 12 | Sagmeister & Walsh | Minimalism | AI-generated | ★★☆ | ★★★ | ★☆☆ | ★★☆ | ★★★ |
+| 13 | Zach Lieberman | Experimental Avant-garde | AI-generated | ★☆☆ | ★☆☆ | ★☆☆ | ★★☆ | ★★★ |
+| 14 | Raven Kwok | Experimental Avant-garde | AI-generated | ★☆☆ | ★★☆ | ★☆☆ | ★★☆ | ★★★ |
+| 15 | Ash Thorp | Experimental Avant-garde | AI-generated | ★★☆ | ★★☆ | ★☆☆ | ★☆☆ | ★★★ |
+| 16 | Territory Studio | Experimental Avant-garde | AI-generated | ★★☆ | ★★☆ | ★☆☆ | ★★☆ | ★★★ |
+| 17 | Takram | Eastern Philosophy | HTML | ★★★ | ★★★ | ★★★ | ★★☆ | ★★☆ |
+| 18 | Kenya Hara | Eastern Philosophy | HTML | ★★☆ | ★★★ | ★★★ | ★☆☆ | ★★★ |
+| 19 | Irma Boom | Eastern Philosophy | Mixed | ★☆☆ | ★★☆ | ★★★ | ★★☆ | ★★★ |
+| 20 | Neo Shen | Eastern Philosophy | AI-generated | ★★☆ | ★★☆ | ★★☆ | ★★☆ | ★★★ |
+
+> **Scene fit:** ★★★ strongly recommended · ★★☆ suitable · ★☆☆ requires adaptation  
+> **Best path:** HTML = code rendering for precise typography and data · AI-generated = direct image output · Mixed = HTML layout + AI-generated imagery
+
+**Core pattern:** Philosophies with explicit visual elements (illustration, particles, generative art) render well via AI image generation. Philosophies that depend on precise typesetting and data (grid systems, information architecture, whitespace) are more controllable through HTML.
+
+---
+
+## School 1 — Information Architecture (01–04)
+
+> Philosophy: "Data is not decoration — it is building material."
+
+<AccordionGroup>
+  <Accordion title="01 · Pentagram / Michael Bierut — Typography as language">
+    **Core philosophy:** Type is language; the grid is thought. Every typographic decision carries semantic weight, and negative space is used strategically — never accidentally.
+
+    **Key visual characteristics:**
+    - Extreme color restraint: black, white, and one brand accent
+    - Swiss grid system in modern interpretation
+    - Typography as the primary visual language
+    - 60%+ whitespace ratio
+    - Data visualization as the main decorative element
+
+    **Prompt DNA:**
+    ```
+    Pentagram/Michael Bierut style:
+    - Extreme typographic hierarchy, Helvetica/Univers family
+    - Swiss grid with precise mathematical spacing
+    - Black/white + one accent color (#HEX)
+    - Information architecture as visual structure
+    - 60%+ whitespace ratio
+    - Data visualization as primary decoration
+    ```
+
+    **Best execution path:** HTML — precision layout requires code control over typography and grid.
+
+    **Best-fit output types:** Web (★★★), PPT (★★★), Cover (★★★)
+
+    **Reference work:** Hillary Clinton 2016 campaign identity (`pentagram hillary logo system`)
+  </Accordion>
+
+  <Accordion title="02 · Stamen Design — Data poetry">
+    **Core philosophy:** Make data feel like a touchable landscape. Apply cartographic thinking to information design so that data layers feel as navigable as topographic maps.
+
+    **Key visual characteristics:**
+    - Cartographic approach applied to data visualization
+    - Algorithm-generated organic patterns
+    - Warm data palette: terracotta, sage green, deep blues
+    - Interactive layered hierarchy
+    - Hand-crafted feel despite digital precision, with soft shadows and depth
+
+    **Prompt DNA:**
+    ```
+    Stamen Design aesthetic:
+    - Cartographic approach to data visualization
+    - Organic, algorithm-generated patterns
+    - Warm palette (terracotta, sage green, deep blues)
+    - Layered information like topographic maps
+    - Hand-crafted feel despite digital precision
+    - Soft shadows and depth
+    ```
+
+    **Best execution path:** Mixed — HTML for layout structure, AI-generated imagery for organic textured backgrounds.
+
+    **Best-fit output types:** Infographic (★★★), Web (★★☆)
+
+    **Reference work:** COVID-19 surge map (`stamen covid map visualization`)
+  </Accordion>
+
+  <Accordion title="03 · Information Architects — Content-first principle">
+    **Core philosophy:** Design is not decoration; it is the architecture of content. Every element that cannot be justified by the content must be removed.
+
+    **Key visual characteristics:**
+    - Extreme content hierarchy clarity
+    - System fonts only, optimized for reading
+    - Classic blue hyperlinks (#0000EE)
+    - Reading-optimized line length (66 characters)
+    - Progressive disclosure of depth
+
+    **Prompt DNA:**
+    ```
+    Information Architects philosophy:
+    - Content-first hierarchy, zero decorative elements
+    - System fonts only (SF Pro/Roboto/Inter)
+    - Classic blue hyperlinks (#0000EE)
+    - Reading-optimized line length (66 characters)
+    - Progressive disclosure of depth
+    - Text-heavy, fast-loading design
+    ```
+
+    **Best execution path:** HTML — content-first typography demands precise rendering, not AI image generation.
+
+    **Best-fit output types:** Web (★★★), PDF (★★★)
+
+    **Reference work:** iA Writer app (`information architects ia writer`)
+  </Accordion>
+
+  <Accordion title="04 · Fathom Information Design — Scientific narrative">
+    **Core philosophy:** Every pixel must carry information. Scientific rigor meets design elegance: the aesthetic of a peer-reviewed journal, made beautiful.
+
+    **Key visual characteristics:**
+    - Scientific journal rigor combined with design elegance
+    - Precise quantitative data visualization: charts, timelines, scatter plots
+    - Cool professional palette: grays and navy with one highlight color
+    - Footnote and citation systems treated as designed elements
+
+    **Prompt DNA:**
+    ```
+    Fathom Information Design style:
+    - Scientific journal aesthetic meets modern design
+    - Precise data visualization (charts, timelines, scatter plots)
+    - Neutral scheme (grays, navy, one highlight color)
+    - Footnote/citation design integrated into layout
+    - Clean sans-serif (GT America/Graphik)
+    - Information density without clutter
+    ```
+
+    **Best execution path:** HTML — quantitative precision requires code-controlled rendering.
+
+    **Best-fit output types:** PPT (★★★), PDF (★★★), Infographic (★★★)
+
+    **Reference work:** Bill & Melinda Gates Foundation annual report (`fathom information design gates foundation`)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## School 2 — Motion Poetry (05–08)
+
+> Philosophy: "Technology itself is a flowing poem."
+
+<AccordionGroup>
+  <Accordion title="05 · Locomotive — Scroll narrative master">
+    **Core philosophy:** Scrolling is not browsing — it is a journey. The viewport is a camera moving through a designed space.
+
+    **Key visual characteristics:**
+    - Silky parallax scrolling
+    - Cinematic storyboard-style scene composition
+    - Bold spatial whitespace between sections
+    - Precise choreography of dynamic elements
+    - Dark mode near-black backgrounds with strategic glowing accents
+
+    **Prompt DNA:**
+    ```
+    Locomotive scroll narrative style:
+    - Film-like scene composition with parallax depth
+    - Generous vertical spacing between sections
+    - Bold typography emerging from darkness
+    - Smooth motion blur effects
+    - Dark mode (near-black backgrounds)
+    - Strategic glowing accents
+    - Hero sections 100vh tall
+    ```
+
+    **Best execution path:** Mixed — HTML scroll mechanics with AI-generated atmospheric imagery.
+
+    **Best-fit output types:** Web (★★★)
+
+    **Reference work:** Lusion.co website (`locomotive scroll lusion`)
+  </Accordion>
+
+  <Accordion title="06 · Active Theory — WebGL poetry">
+    **Core philosophy:** Making technology visible is making technology understandable. 3D particle systems become the medium through which data tells its story.
+
+    **Key visual characteristics:**
+    - 3D particle systems as core visual elements
+    - Real-time rendered data visualization
+    - Mouse-reactive environment building
+    - Neon and deep space palette: cyan, magenta, electric blue on dark backgrounds
+    - Depth of field, bokeh effects, floating UI with glassmorphism
+
+    **Prompt DNA:**
+    ```
+    Active Theory WebGL aesthetic:
+    - Particle systems representing data flow
+    - 3D visualization in depth space
+    - Neon gradients (cyan/magenta/electric blue) on dark
+    - Mouse-reactive environment
+    - Depth of field and bokeh effects
+    - Floating UI with glassmorphism
+    ```
+
+    **Best execution path:** AI-generated — particle and 3D depth imagery renders well via image generation.
+
+    **Best-fit output types:** Web (★★★), Cover (★★☆)
+
+    **Reference work:** NASA Prospect (`active theory nasa webgl`)
+  </Accordion>
+
+  <Accordion title="07 · Field.io — Algorithmic aesthetics">
+    **Core philosophy:** Code is the designer. The system generates unique compositions on every run, making the algorithm itself the creative author.
+
+    **Key visual characteristics:**
+    - Generative art systems with unique compositions per render
+    - Abstract geometric patterns that feel computational
+    - Monochromatic base with one vibrant accent
+    - Mathematical precision in spacing: Voronoi diagrams, Delaunay triangulation
+
+    **Prompt DNA:**
+    ```
+    Field.io generative design style:
+    - Abstract geometric patterns, algorithmically generated
+    - Dynamic composition that feels computational
+    - Monochromatic base with vibrant accent
+    - Mathematical precision in spacing
+    - Voronoi diagrams or Delaunay triangulation
+    - Clean code aesthetic
+    ```
+
+    **Best execution path:** AI-generated — generative art patterns produce strong results via image generation.
+
+    **Best-fit output types:** Cover (★★★), Infographic (★★☆)
+
+    **Reference work:** British Council digital installations (`field.io generative design`)
+  </Accordion>
+
+  <Accordion title="08 · Resn — Narrative-driven interaction">
+    **Core philosophy:** Every click advances the story. The interface is a game engine for delivering emotional experiences.
+
+    **Key visual characteristics:**
+    - Gamified user journeys with progress indicators
+    - Strong emotional design through illustration and character
+    - Illustration deeply integrated with UI elements
+    - Non-linear exploration experiences
+    - Warm color palette even for technical subject matter
+
+    **Prompt DNA:**
+    ```
+    Resn interactive storytelling approach:
+    - Illustrative style mixed with UI elements
+    - Gamified exploration (progress indicators)
+    - Warm color palette despite tech subject
+    - Character-driven design
+    - Scroll-triggered animations
+    - Editorial illustration meets product design
+    ```
+
+    **Best execution path:** AI-generated — illustrative character-driven style works well with image generation.
+
+    **Best-fit output types:** Web (★★★)
+
+    **Reference work:** Resn.co.nz portfolio (`resn interactive storytelling`)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## School 3 — Minimalism (09–12)
+
+> Philosophy: "Reduce until nothing more can be removed."
+
+<AccordionGroup>
+  <Accordion title="09 · Experimental Jetset — Conceptual minimalism">
+    **Core philosophy:** One idea equals one form. A single visual metaphor carries the entire design. Anti-commercial honesty over decorative appeal.
+
+    **Key visual characteristics:**
+    - Single visual metaphor sustaining the entire design
+    - Primary colors only: red, blue, yellow, plus black and white
+    - Typography as the primary graphic element
+    - Grid-based with deliberate rule-breaking
+    - No photography — only type and geometry
+
+    **Prompt DNA:**
+    ```
+    Experimental Jetset conceptual minimalism:
+    - Single visual metaphor for entire design
+    - Primary colors only (red/blue/yellow) + black/white
+    - Typography as main graphic element
+    - Grid-based with deliberate rule-breaking
+    - No photography, only type and geometry
+    - Anti-commercial, honest aesthetic
+    ```
+
+    **Best execution path:** Mixed — HTML for typographic grid, AI for the single strong visual metaphor.
+
+    **Best-fit output types:** Cover (★★★)
+
+    **Reference work:** Whitney Museum identity (`experimental jetset whitney responsive w`)
+  </Accordion>
+
+  <Accordion title="10 · Müller-Brockmann — Swiss grid purism">
+    **Core philosophy:** Objectivity is beauty. Mathematical precision in grid construction is a moral position, not just an aesthetic one.
+
+    **Key visual characteristics:**
+    - Mathematically precise grid system on an 8pt baseline
+    - Absolute left alignment or centered alignment — nothing in between
+    - Monochrome or two-color scheme maximum
+    - Functionalism over all else
+    - Akzidenz-Grotesk or equivalent rationalist typeface
+
+    **Prompt DNA:**
+    ```
+    Josef Müller-Brockmann Swiss modernism:
+    - Mathematical grid system (8pt baseline)
+    - Strict alignment (flush left or centered)
+    - Two-color maximum (black + one accent)
+    - Akzidenz-Grotesk or similar rationalist typeface
+    - No decorative elements
+    - Timeless, objective aesthetic
+    ```
+
+    **Best execution path:** HTML — grid precision requires code control.
+
+    **Best-fit output types:** PPT (★★★), PDF (★★★), Infographic (★★★)
+
+    **Reference work:** *Grid Systems in Graphic Design* (`muller brockmann grid systems poster`)
+  </Accordion>
+
+  <Accordion title="11 · Build — Contemporary luxury minimalism">
+    **Core philosophy:** Sophisticated simplicity is harder to achieve than complexity. Luxury is earned through restraint, not addition.
+
+    **Key visual characteristics:**
+    - Generous whitespace: 70%+ of the composition area
+    - Subtle typographic weight contrast from 200 to 600
+    - Single accent color deployed sparingly
+    - Breathing rhythm between elements
+    - Golden ratio proportions, soft shadows
+
+    **Prompt DNA:**
+    ```
+    Build studio luxury minimalism:
+    - Generous whitespace (70%+ of area)
+    - Subtle typography weight shifts (200 to 600)
+    - Single accent color used sparingly
+    - High-end product photography aesthetic
+    - Soft shadows and subtle gradients
+    - Golden ratio proportions
+    ```
+
+    **Best execution path:** HTML — whitespace and typographic rhythm require precise rendering.
+
+    **Best-fit output types:** Web (★★★), PPT (★★★), Cover (★★★)
+
+    **Reference work:** Build studio portfolio (`build studio london branding`)
+  </Accordion>
+
+  <Accordion title="12 · Sagmeister & Walsh — Joyful minimalism">
+    **Core philosophy:** Beauty is the emotional dimension of function. Joy is not decoration — it is a design requirement.
+
+    **Key visual characteristics:**
+    - Unexpected color bursts on a minimal base
+    - Handmade elements: physical objects appearing in digital contexts
+    - Optimistic, positive visual language
+    - Experimental typography that remains legible
+    - Human warmth through deliberate imperfection
+
+    **Prompt DNA:**
+    ```
+    Sagmeister & Walsh joyful philosophy:
+    - Unexpected color bursts on minimal base
+    - Handmade elements (physical objects in digital)
+    - Optimistic visual language
+    - Experimental typography that remains legible
+    - Human warmth through imperfection
+    - Mix of analog and digital aesthetics
+    ```
+
+    **Best execution path:** AI-generated — handmade and analog-digital hybrid aesthetics render well via image generation.
+
+    **Best-fit output types:** PPT (★★★), Cover (★★★)
+
+    **Reference work:** The Happy Show (`sagmeister walsh happy show`)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## School 4 — Experimental Avant-garde (13–16)
+
+> Philosophy: "Breaking rules is creating rules."
+
+<AccordionGroup>
+  <Accordion title="13 · Zach Lieberman — Code poetry">
+    **Core philosophy:** Programming is painting. The algorithm is the brush. The visible construction lines and process are part of the artwork.
+
+    **Key visual characteristics:**
+    - Hand-drawn aesthetic generated by code
+    - Black and white only — no color
+    - Real-time generative patterns with sketch-like line quality
+    - Visible process, grid, and construction lines
+    - Poetic interpretation of algorithms
+
+    **Prompt DNA:**
+    ```
+    Zach Lieberman code-as-art style:
+    - Hand-drawn aesthetic generated by code
+    - Black and white only, no color
+    - Real-time generative patterns
+    - Sketch-like line quality
+    - Visible process/grid/construction lines
+    - Poetic interpretation of algorithms
+    ```
+
+    **Best execution path:** AI-generated — generative sketch aesthetics produce strong results via image generation.
+
+    **Best-fit output types:** Cover (★★★)
+
+    **Reference work:** openFrameworks creative coding (`zach lieberman openframeworks generative`)
+  </Accordion>
+
+  <Accordion title="14 · Raven Kwok — Parametric aesthetics">
+    **Core philosophy:** The beauty of a system surpasses the beauty of any individual element within it. Fractal structures reveal patterns that reward inspection at every scale.
+
+    **Key visual characteristics:**
+    - Fractal patterns and recursive structures
+    - High-contrast black and white
+    - Architectural visualization of data
+    - Chinese garden principles interpreted algorithmically
+    - Intricate detail that rewards zooming in
+
+    **Prompt DNA:**
+    ```
+    Raven Kwok parametric aesthetic:
+    - Fractal patterns and recursive structures
+    - High-contrast black and white
+    - Architectural visualization of data
+    - Chinese garden principles in algorithm form
+    - Intricate detail that rewards zooming
+    - Processing/Creative coding aesthetic
+    ```
+
+    **Best execution path:** AI-generated — parametric and fractal patterns render well via image generation.
+
+    **Best-fit output types:** Cover (★★★)
+
+    **Reference work:** Raven Kwok generative art exhibitions (`raven kwok processing generative art`)
+  </Accordion>
+
+  <Accordion title="15 · Ash Thorp — Cinematic concept art">
+    **Core philosophy:** The future is not cold — it is a poem of loneliness. Cyberpunk with warmth: orange and teal instead of cold blue.
+
+    **Key visual characteristics:**
+    - Film-grade lighting and atmospheric effects
+    - Warm cyberpunk palette: orange and teal, not cold blue
+    - Industrial design aesthetics made luxurious
+    - Narrative concept art feel with volumetric lighting and god rays
+    - Blade Runner warmth over Tron coldness
+
+    **Prompt DNA:**
+    ```
+    Ash Thorp cinematic concept art:
+    - Film-grade lighting and atmospheric effects
+    - Warm cyberpunk (orange/teal, NOT cold blue)
+    - Industrial design meets luxury
+    - Narrative concept art feel
+    - Volumetric lighting and god rays
+    - Blade Runner warmth over Tron coldness
+    ```
+
+    **Best execution path:** AI-generated — cinematic atmospheric lighting renders best via image generation.
+
+    **Best-fit output types:** Cover (★★★)
+
+    **Reference work:** Ghost in the Shell concept art (`ash thorp ghost shell concept art`)
+  </Accordion>
+
+  <Accordion title="16 · Territory Studio — Screen-based fiction (FUI)">
+    **Core philosophy:** Today's imagination of tomorrow's UI. Fantasy User Interface design that must feel credible even though it has never existed.
+
+    **Key visual characteristics:**
+    - Fantasy User Interface design (FUI) as seen in sci-fi films
+    - Holographic projection aesthetics
+    - Orange/amber monochrome or cyan accents
+    - Multiple overlapping data layers
+    - Believable future technology with technical readouts and data streams
+
+    **Prompt DNA:**
+    ```
+    Territory Studio FUI (Fantasy User Interface):
+    - Fantasy User Interface design
+    - Holographic projection aesthetics
+    - Orange/amber monochrome or cyan accents
+    - Multiple overlapping data layers
+    - Believable future technology
+    - Technical readouts and data streams
+    ```
+
+    **Best execution path:** AI-generated — holographic FUI aesthetics render strongly via image generation.
+
+    **Best-fit output types:** Cover (★★★)
+
+    **Reference work:** Blade Runner 2049 screen graphics (`territory studio blade runner interface`)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## School 5 — Eastern Philosophy (17–20)
+
+> Philosophy: "Negative space is content."
+
+<AccordionGroup>
+  <Accordion title="17 · Takram — Japanese speculative design">
+    **Core philosophy:** Technology is a medium for thinking. Design is philosophical inquiry made tangible. The prototype is the argument.
+
+    **Key visual characteristics:**
+    - Elegant concept prototypes and diagrams treated as art
+    - Soft technology aesthetic: rounded corners, gentle shadows
+    - Charts and diagrams elevated to art pieces
+    - Modest sophistication with neutral natural colors: beige, soft gray, muted green
+
+    **Prompt DNA:**
+    ```
+    Takram Japanese speculative design:
+    - Elegant concept prototypes and diagrams
+    - Soft tech aesthetic (rounded corners, gentle shadows)
+    - Charts and diagrams as art pieces
+    - Modest sophistication
+    - Neutral natural colors (beige, soft gray, muted green)
+    - Design as philosophical inquiry
+    ```
+
+    **Best execution path:** HTML — diagram precision and subtle proportions require code rendering.
+
+    **Best-fit output types:** Web (★★★), PPT (★★★), PDF (★★★)
+
+    **Reference work:** NHK Fabricated City (`takram nhk data visualization`)
+  </Accordion>
+
+  <Accordion title="18 · Kenya Hara — The design of emptiness">
+    **Core philosophy:** Design is not filling — it is clearing. The goal is not to add but to subtract until the essential meaning is exposed.
+
+    **Key visual characteristics:**
+    - Extreme whitespace: 80%+ of the composition area
+    - Paper texture and tactility translated into digital form
+    - Multiple layers of white: warm white, cool white, off-white
+    - Minimal or fully desaturated color
+    - Zen simplicity through subtraction
+
+    **Prompt DNA:**
+    ```
+    Kenya Hara "emptiness" design:
+    - Extreme whitespace (80%+)
+    - Paper texture and tactility in digital form
+    - Layers of white (warm white, cool white, off-white)
+    - Minimal color (if any, very desaturated)
+    - Design by subtraction not addition
+    - Zen simplicity
+    ```
+
+    **Best execution path:** HTML — whitespace precision and subtle tonal variation require code control.
+
+    **Best-fit output types:** PPT (★★★), PDF (★★★), Cover (★★★)
+
+    **Reference work:** Muji art direction; *Designing Design* (`kenya hara designing design muji`)
+  </Accordion>
+
+  <Accordion title="19 · Irma Boom — Book architecture">
+    **Core philosophy:** The physical poetry of information. Non-linear structure, unconventional grids, and unexpected color combinations that reward deep exploration.
+
+    **Key visual characteristics:**
+    - Non-linear information architecture
+    - Play with edges, margins, and boundaries
+    - Unexpected color combinations: pink + red, orange + brown
+    - Handcraft translated into digital form
+    - Dense information that invites exploration through editorial unconventional grids
+
+    **Prompt DNA:**
+    ```
+    Irma Boom book architecture style:
+    - Non-linear information structure
+    - Play with edges, margins, boundaries
+    - Unexpected color combos (pink+red, orange+brown)
+    - Handcraft translated to digital
+    - Dense information inviting exploration
+    - Editorial design, unconventional grid
+    ```
+
+    **Best execution path:** Mixed — HTML for complex information architecture, AI for handcraft textural elements.
+
+    **Best-fit output types:** PDF (★★★), Cover (★★★)
+
+    **Reference work:** SHV Think Book (2136 pages) (`irma boom shv think book`)
+  </Accordion>
+
+  <Accordion title="20 · Neo Shen — Eastern light and shadow poetry">
+    **Core philosophy:** Technology needs human warmth. The digital medium becomes a canvas for the emotional qualities of ink wash painting: diffusion, atmosphere, and poetic silence.
+
+    **Key visual characteristics:**
+    - Digital interpretation of ink wash painting techniques
+    - Soft glow and light diffusion effects
+    - Poetic negative space
+    - Emotional palette: deep blues, warm grays, soft gold
+    - Calligraphic influences in typography, atmospheric depth
+
+    **Prompt DNA:**
+    ```
+    Neo Shen poetic Chinese aesthetic:
+    - Digital interpretation of ink wash painting
+    - Soft glow and light diffusion effects
+    - Poetic negative space
+    - Emotional palette (deep blues, warm grays, soft gold)
+    - Calligraphic influences in typography
+    - Atmospheric depth
+    ```
+
+    **Best execution path:** AI-generated — ink wash diffusion and atmospheric depth render best via image generation.
+
+    **Best-fit output types:** Cover (★★★)
+
+    **Reference work:** Neo Shen digital art series (`neo shen digital ink wash art`)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Scene × style compatibility table
+
+The full compatibility matrix from `references/design-styles.md`, showing which philosophies are strongest for each output type:
+
+| Philosophy | Web | PPT | PDF | Infographic | Cover | AI direct | Best path |
+|-----------|:---:|:---:|:---:|:-----------:|:-----:|:---------:|-----------|
+| 01 Pentagram | ★★★ | ★★★ | ★★☆ | ★★☆ | ★★★ | ★☆☆ | HTML |
+| 02 Stamen Design | ★★☆ | ★★☆ | ★★☆ | ★★★ | ★★☆ | ★★☆ | Mixed |
+| 03 Information Architects | ★★★ | ★☆☆ | ★★★ | ★☆☆ | ★☆☆ | ★☆☆ | HTML |
+| 04 Fathom | ★★☆ | ★★★ | ★★★ | ★★★ | ★★☆ | ★☆☆ | HTML |
+| 05 Locomotive | ★★★ | ★★☆ | ★☆☆ | ★☆☆ | ★★☆ | ★★☆ | Mixed |
+| 06 Active Theory | ★★★ | ★☆☆ | ★☆☆ | ★☆☆ | ★★☆ | ★★★ | AI-generated |
+| 07 Field.io | ★★☆ | ★★☆ | ★☆☆ | ★★☆ | ★★★ | ★★★ | AI-generated |
+| 08 Resn | ★★★ | ★☆☆ | ★☆☆ | ★☆☆ | ★★☆ | ★★☆ | AI-generated |
+| 09 Experimental Jetset | ★★☆ | ★★☆ | ★★☆ | ★★☆ | ★★★ | ★★☆ | Mixed |
+| 10 Müller-Brockmann | ★★☆ | ★★★ | ★★★ | ★★★ | ★★☆ | ★☆☆ | HTML |
+| 11 Build | ★★★ | ★★★ | ★★☆ | ★☆☆ | ★★★ | ★☆☆ | HTML |
+| 12 Sagmeister & Walsh | ★★☆ | ★★★ | ★☆☆ | ★★☆ | ★★★ | ★★★ | AI-generated |
+| 13 Zach Lieberman | ★☆☆ | ★☆☆ | ★☆☆ | ★★☆ | ★★★ | ★★★ | AI-generated |
+| 14 Raven Kwok | ★☆☆ | ★★☆ | ★☆☆ | ★★☆ | ★★★ | ★★★ | AI-generated |
+| 15 Ash Thorp | ★★☆ | ★★☆ | ★☆☆ | ★☆☆ | ★★★ | ★★★ | AI-generated |
+| 16 Territory Studio | ★★☆ | ★★☆ | ★☆☆ | ★★☆ | ★★★ | ★★★ | AI-generated |
+| 17 Takram | ★★★ | ★★★ | ★★★ | ★★☆ | ★★☆ | ★☆☆ | HTML |
+| 18 Kenya Hara | ★★☆ | ★★★ | ★★★ | ★☆☆ | ★★★ | ★☆☆ | HTML |
+| 19 Irma Boom | ★☆☆ | ★★☆ | ★★★ | ★★☆ | ★★★ | ★★☆ | Mixed |
+| 20 Neo Shen | ★★☆ | ★★☆ | ★★☆ | ★★☆ | ★★★ | ★★★ | AI-generated |
+
+## Prompt usage notes
+
+Combine the prompt DNA of your chosen philosophy with a scene template and specific content:
+
+```
+[Style prompt DNA] + [Scene template] + [Specific content]
+```
+
+When writing prompts for AI image generation, describe mood rather than layout. Short emotional prompts outperform long layout specifications.
+
+| Kills variety | Sparks creativity |
+|---------------|-------------------|
+| Specify color ratios (60%/25%/15%) | Describe mood ("warm like Sunday morning") |
+| Prescribe layout positions ("title centered, image on right") | Reference a specific aesthetic ("Pentagram editorial feel") |
+| List every visual element to include | Describe what the viewer should feel |
+
+**Quality controls:**
+1. Do not write "in the style of Pentagram" directly — describe specific design characteristics instead.
+2. Text in AI-generated images is often unreliable — generate the image first, then replace text.
+3. Always specify the aspect ratio to prevent proportion distortion.
+4. Generate 3–5 variants first, then select and refine the best.
+
+**Default aesthetic restrictions** (users can override per brand):
+- Avoid cyber neon / deep blue backgrounds (`#0D1117`)
+- Avoid adding personal signatures or watermarks to cover images

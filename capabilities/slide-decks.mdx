@@ -1,0 +1,224 @@
+---
+title: "Create HTML slide decks and export to PPTX"
+description: "Build browser-ready HTML presentations with deck_stage.js or multi-file decks, then export to editable PPTX with real text frames using html2pptx.js."
+---
+
+Huashu-Design builds slide decks as HTML — rendered at 1920×1080 in a browser, navigated with arrow keys, and exported to PDF or editable PPTX without changing a line of markup. Before you write a single slide, two decisions lock in the entire approach: the delivery format (browser/PDF vs editable PPTX) and the file architecture (single-file vs multi-file).
+
+## Confirm the delivery format first
+
+This decision comes before architecture. Getting it wrong after the HTML is written costs 2–3 hours of rework (confirmed on a real project, 2026-04-20).
+
+```
+What is the final deliverable?
+├── Browser presentation / PDF          → Maximum visual freedom — any architecture works
+└── Editable PPTX (colleagues will edit text) → Write HTML from line 1 per the 4 hard constraints below
+```
+
+A deck built with the editable-PPTX constraints is still fully playable in a browser. There is no extra cost to supporting both formats — the Path A HTML is valid browser HTML.
+
+## Architecture: single-file vs multi-file
+
+<Tabs>
+  <Tab title="Multi-file (default, ≥10 pages)">
+    Each slide is an independent `1920×1080` HTML file. `deck_index.html` assembles them with iframes.
+
+    **Use when:** deck has ≥ 10 pages, content is academic/course material, or multiple agents build slides in parallel.
+
+    **Benefits:** CSS is fully isolated per slide (iframes), any slide can be double-clicked and previewed independently, parallel development has zero merge conflicts.
+
+    ```
+    my-deck/
+    ├── index.html              # Copy from assets/deck_index.html, edit MANIFEST only
+    ├── shared/
+    │   ├── tokens.css          # Shared design tokens (palette, type scale, canvas lock)
+    │   └── fonts.html          # <link> for Google Fonts — include per page
+    └── slides/
+        ├── 01-cover.html
+        ├── 02-agenda.html
+        └── ...
+    ```
+
+    The only change needed in `index.html` is the `DECK_MANIFEST` array:
+
+    ```js
+    window.DECK_MANIFEST = [
+      { file: "slides/01-cover.html",   label: "Cover" },
+      { file: "slides/02-agenda.html",  label: "Agenda" },
+      { file: "slides/03-problem.html", label: "Problem" },
+    ];
+    ```
+
+    The assembler provides keyboard navigation (←/→/Home/End/P for print), auto-scale with letterbox, slide counter, localStorage memory, and hash-based jump links.
+  </Tab>
+  <Tab title="Single-file (≤10 pages)">
+    All slides live as `<section>` elements inside a single `<deck-stage>` web component.
+
+    **Use when:** deck has ≤ 10 pages, requires cross-slide shared state (e.g., a React Tweaks panel controlling all slides), or you need an ultra-compact pitch deck.
+
+    ```html
+    <body>
+      <deck-stage>
+        <section>
+          <h1>Slide 1</h1>
+        </section>
+        <section>
+          <h1>Slide 2</h1>
+        </section>
+      </deck-stage>
+
+      <!-- ✅ Script MUST come after </deck-stage> -->
+      <script src="deck_stage.js"></script>
+    </body>
+    ```
+
+    `deck_stage.js` is read from `assets/deck_stage.js` and inlined (or referenced). It provides: fixed 1920×1080 canvas with auto-scale and letterbox, keyboard navigation, slide counter, localStorage persistence, speaker notes via postMessage, hash navigation (`#slide-5`), and print-to-PDF.
+  </Tab>
+</Tabs>
+
+## `deck_stage.js` hard constraints
+
+Two bugs have been confirmed in real projects. Both are fatal to the single-file architecture.
+
+### Constraint 1: script placement
+
+<Warning>
+Never put `<script src="deck_stage.js">` in `<head>` without `defer`. If the parser encounters `<deck-stage>` before the script runs, `connectedCallback` fires with zero child sections — the counter reads `1 / 0` and all slides render simultaneously.
+</Warning>
+
+Three safe options:
+
+```html
+<!-- ✅ Most reliable: script after </deck-stage> -->
+</deck-stage>
+<script src="deck_stage.js"></script>
+
+<!-- ✅ Also valid: defer in head -->
+<head><script src="deck_stage.js" defer></script></head>
+
+<!-- ✅ Also valid: module (implicitly deferred) -->
+<head><script src="deck_stage.js" type="module"></script></head>
+```
+
+### Constraint 2: `display: flex` belongs on `.active`, not on `section`
+
+Writing `display: flex` directly on `deck-stage > section` overrides the shadow DOM's `::slotted(section) { display: none }` rule — all slides stack on top of each other simultaneously.
+
+```css
+/* ❌ This breaks everything — all slides render at once */
+deck-stage > section {
+  display: flex;
+  flex-direction: column;
+  padding: 80px;
+}
+
+/* ✅ Correct pattern */
+deck-stage > section {
+  background: var(--paper);
+  padding: 80px 120px;
+  overflow: hidden;
+  position: relative;
+  /* Never set display here */
+}
+
+deck-stage > section:not(.active) {
+  display: none !important;
+}
+
+deck-stage > section.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+```
+
+## Speaker notes
+
+Add notes only when the user requests them. Notes let you strip slide text down to impactful visuals while the full script lives in the notes panel.
+
+```html
+<script type="application/json" id="speaker-notes">
+[
+  "Script for slide one — write conversational, not formal.",
+  "Script for slide two...",
+  "..."
+]
+</script>
+```
+
+This block goes in `<head>` for both architectures. Array index N maps to slide N+1.
+
+## PPTX export modes
+
+```bash
+# Image mode — visually perfect, text is not editable
+node scripts/export_deck_pptx.mjs --slides slides/ --out deck.pptx --mode image
+
+# Editable mode — real text frames, font fallback applies
+node scripts/export_deck_pptx.mjs --slides slides/ --out deck.pptx --mode editable
+```
+
+| Mode | Visual fidelity | Text editable | How it works |
+|------|-----------------|---------------|--------------|
+| `image` | 100% | No | Playwright screenshot → pptxgenjs `addImage` |
+| `editable` | ~70% | Yes | `html2pptx.js` translates each DOM element to a PowerPoint text frame |
+
+### 4 hard constraints for editable PPTX HTML
+
+The `html2pptx.js` translator requires these rules in the source HTML. Violations cause that slide to be skipped.
+
+<Warning>
+These constraints must be applied from the first line of HTML. Retrofitting a completed visual deck takes 2–3 hours.
+</Warning>
+
+<AccordionGroup>
+  <Accordion title="Rule 1: Text must be in <p> or <h1>–<h6>, never bare in a div">
+    PowerPoint text frames map to HTML paragraph-level elements. A bare `<div>` has no text container equivalent in PPTX.
+
+    ```html
+    <!-- ❌ Text directly in div -->
+    <div class="title">Q3 Revenue up 23%</div>
+
+    <!-- ✅ Wrapped in a paragraph element -->
+    <div class="title"><h1>Q3 Revenue up 23%</h1></div>
+    ```
+  </Accordion>
+  <Accordion title="Rule 2: No CSS gradients">
+    PowerPoint shapes use solid fills only. Use `oklch()` or hex colors, never `background: linear-gradient(...)`.
+  </Accordion>
+  <Accordion title="Rule 3: No background, border, or shadow on <p> or <h*> tags">
+    Place decorative borders and backgrounds on the outer wrapper `<div>`, not on the text element itself.
+
+    ```html
+    <!-- ❌ Border on the <p> -->
+    <p class="stat" style="border-left: 3px solid red;">41%</p>
+
+    <!-- ✅ Border on the wrapper -->
+    <div style="border-left: 3px solid red;"><p class="stat">41%</p></div>
+    ```
+  </Accordion>
+  <Accordion title="Rule 4: No background-image on div — use <img> tags">
+    `html2pptx.js` cannot extract CSS `background-image` URLs. Replace them with `<img src="...">` elements styled to the same position.
+  </Accordion>
+</AccordionGroup>
+
+## PDF export
+
+```bash
+# Multi-file architecture
+node scripts/export_deck_pdf.mjs --slides slides/ --out deck.pdf
+
+# Single-file deck-stage architecture
+node scripts/export_deck_stage_pdf.mjs --html deck.html --out deck.pdf
+```
+
+Both scripts produce vector PDFs with searchable text using Playwright's Chromium renderer and `pdf-lib` for merging. The single-file script includes special handling to extract `<section>` elements out of the shadow DOM before printing — bypassing the `::slotted(section) { display: none }` rule that otherwise produces a one-page output.
+
+## Choosing a format
+
+| Scenario | Recommended output |
+|----------|--------------------|
+| Archive, email, or print | PDF (universal, vector, searchable) |
+| Collaborators need to edit text | PPTX editable (accept font fallback) |
+| Live presentation, content fixed | PDF or PPTX image |
+| HTML is the primary medium | Play in browser; export is a backup |

@@ -1,0 +1,126 @@
+---
+title: "Skill configuration and fact verification rules"
+description: "How to configure Huashu Design after installation, plus the mandatory fact-verification protocol that runs before any design task begins."
+---
+
+Huashu Design is scoped to a specific set of output types and operates under a mandatory fact-verification protocol before any design work begins. This page describes which scenarios the skill applies to, which are explicitly out of scope, and the rules that govern how the skill handles uncertainty about real-world facts before touching any design tools.
+
+## Applicable scenarios
+
+Huashu Design is designed for visual output produced through HTML. It is not a general-purpose web development tool.
+
+| In scope | Out of scope |
+|----------|--------------|
+| **Interactive prototypes** — high-fidelity product mockups users can click, switch, and explore | Production web applications |
+| **Design variation exploration** — side-by-side comparison of multiple directions, or real-time parameter tuning with Tweaks | SEO websites and content sites |
+| **Presentation slide decks** — 1920×1080 HTML decks usable in place of PowerPoint | Backend-dependent dynamic systems |
+| **Animation demos** — timeline-driven motion design for video assets or concept demonstrations | Any system requiring a server to function |
+| **Infographics and data visualizations** — precise typesetting, data-driven layout, print-quality output | |
+
+When a request falls outside the applicable scenarios, use a frontend-design skill instead.
+
+---
+
+## Principle #0 — Fact verification before any design task
+
+<Warning>
+This principle has the highest priority in the skill. It overrides all other workflows, including the step of asking clarifying questions. Facts must be verified before questions are asked — questions asked on a false factual premise are useless.
+</Warning>
+
+Any design task that references a specific product, technology, event, or person requires a `WebSearch` verification step before any design work begins. This is mandatory and non-negotiable.
+
+**The cost comparison that justifies this rule:**
+
+| Action | Time |
+|--------|------|
+| `WebSearch` to verify product existence and status | 10 seconds |
+| Reworking a deliverable built on a false assumption | 1–2 hours |
+
+A real example of what this prevents (April 20, 2026): a user asked for a launch animation for DJI Pocket 4. Without verifying, the agent assumed the product had not yet launched and produced a "concept silhouette" animation. The Pocket 4 had launched 4 days earlier, with official renders and a launch film. The deliverable was entirely wrong and required complete rework.
+
+### Trigger conditions
+
+Run the verification process when **any** of the following is true:
+
+- The user mentions a specific product name you do not recognize or are uncertain about (e.g. "DJI Pocket 4", "Nano Banana Pro", "Gemini 3 Pro", a new SDK version)
+- The task involves release timelines, version numbers, or specifications from 2024 onward
+- You notice yourself about to write any of these phrases: "I think", "I believe", "should not have launched yet", "probably", "I recall", "approximately", "as far as I know"
+- The user requests design materials for a specific brand or product
+
+### The 4-step hard process
+
+<Steps>
+  <Step title="WebSearch the product">
+    Search the product name with a current time qualifier: `"2026 latest"`, `"launch date"`, `"release"`, or `"specs"`.
+  </Step>
+  <Step title="Read 1–3 authoritative results">
+    Confirm: existence / release status / latest version number / key specifications.
+  </Step>
+  <Step title="Write facts to product-facts.md">
+    Record the verified facts in the project's `product-facts.md` file. Do not rely on memory for subsequent steps.
+  </Step>
+  <Step title="Ask if still unclear">
+    If search results are ambiguous or not found, ask the user directly. Never assume or extrapolate.
+  </Step>
+</Steps>
+
+### Forbidden phrases
+
+These phrases signal that you are about to make an unverified factual assertion. When you catch yourself about to write any of them, stop and run a WebSearch first.
+
+| Forbidden | Correct replacement |
+|-----------|---------------------|
+| ❌ "I think X hasn't launched yet" | ✅ "Let me WebSearch X's current status" |
+| ❌ "X is currently at version N" (without searching) | ✅ "The authoritative source says X is at version N" |
+| ❌ "X probably doesn't exist" | ✅ "I couldn't find X in search results — can you confirm?" |
+| ❌ "As far as I know, X's specs are..." | ✅ "Search results show X's specs are..." |
+
+### Relationship to the brand asset protocol
+
+Principle #0 is a prerequisite for the brand asset protocol. First confirm the product exists and what its current state is. Then go find its logo, product images, and color values. The order cannot be reversed — searching for assets for a product you have not verified leads to fetching stale or incorrect materials.
+
+---
+
+## Anomaly handling
+
+These six edge cases arise regularly in practice. Each has a defined fallback.
+
+<AccordionGroup>
+  <Accordion title="Brief is too vague to start work">
+    **Trigger:** User gives only a vague description such as "make something nice" or "help me design."
+
+    **Fallback:** Proactively list 3 possible directions and ask the user to choose (e.g. "Landing page / Dashboard / Product detail page"), rather than asking 10 clarifying questions. This respects the user's time while still gathering enough signal to proceed.
+  </Accordion>
+
+  <Accordion title="User refuses to answer questions">
+    **Trigger:** User says "stop asking, just do it."
+
+    **Fallback:** Respect the pace. Use best judgment to produce one primary design and one clearly different variant. At delivery, explicitly label every assumption made so the user can identify which parts to change without re-briefing.
+  </Accordion>
+
+  <Accordion title="Design context contains contradictions">
+    **Trigger:** A reference image and a brand specification conflict (e.g. the screenshot uses a serif typeface but the spec says sans-serif).
+
+    **Fallback:** Stop. Name the specific contradiction explicitly ("the screenshot uses a serif, the spec says sans") and let the user choose which source takes priority. Do not silently pick one.
+  </Accordion>
+
+  <Accordion title="Starter component fails to load (404 or integrity mismatch)">
+    **Trigger:** Browser console shows a 404 or integrity error when loading a component from `assets/`.
+
+    **Fallback:** Check `references/react-setup.md` for the common error table first. If that does not resolve it, fall back to plain HTML + CSS without React, ensuring the deliverable is still functional. Note the degradation to the user.
+  </Accordion>
+
+  <Accordion title="Tight deadline — less than 30 minutes">
+    **Trigger:** User says "I need this in 30 minutes."
+
+    **Fallback:** Skip the Junior pass (assumptions + placeholder review) and go directly to the full implementation. Produce one design instead of three variants. At delivery, explicitly note "not early-validated" and flag that quality may be reduced. Do not pretend the timeline had no effect.
+  </Accordion>
+
+  <Accordion title="Single HTML file exceeds 1000 lines">
+    **Trigger:** A new HTML file grows beyond 1000 lines during development.
+
+    **Fallback:** Split following the strategy in `references/react-setup.md`: extract components into separate `.jsx` files and export them with `Object.assign(window, {...})` at the end of each file. Use `Object.assign` rather than module imports, since `file://` protocol blocks cross-origin script loads and forces users to start an HTTP server.
+  </Accordion>
+</AccordionGroup>
+
+**Principle for all anomalies:** Always tell the user what happened (one sentence) before applying the fallback. Never make a silent decision.

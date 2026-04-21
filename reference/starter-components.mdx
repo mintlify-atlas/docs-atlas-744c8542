@@ -1,0 +1,388 @@
+---
+title: "Starter components: frames, decks, and canvases"
+description: "All ready-to-use HTML/JSX starter components in the assets/ directory — device frames, animation engine, deck stage, and design canvas."
+---
+
+The `assets/` directory ships eight ready-to-use components. Each one solves a recurring scaffolding problem — device mockup chrome, animation timelines, slide layout, or design comparison — so you can focus on the content rather than rebuilding the container. All components follow the same inclusion pattern: read the file, inline the source into your HTML `<script>` tag, then use the exported component or web element directly.
+
+## All components at a glance
+
+<CardGroup cols={2}>
+  <Card title="animations.jsx" icon="film">
+    Timeline animation engine. Stage + Sprite model with Easing, interpolate, useTime, and useSprite hooks.
+  </Card>
+  <Card title="ios_frame.jsx" icon="mobile">
+    iPhone 15 Pro device chrome. Dynamic Island, status bar with time and battery, Home Indicator, content area.
+  </Card>
+  <Card title="android_frame.jsx" icon="tablet-smartphone">
+    Android device bezel for Android app mockups.
+  </Card>
+  <Card title="macos_window.jsx" icon="monitor">
+    macOS window chrome with traffic light buttons for desktop app mockups.
+  </Card>
+  <Card title="browser_window.jsx" icon="globe">
+    Browser chrome with URL bar and tab bar for web page mockups.
+  </Card>
+  <Card title="deck_stage.js" icon="presentation">
+    Web component for single-file slide decks. Auto-scale, keyboard navigation, localStorage persistence.
+  </Card>
+  <Card title="deck_index.html" icon="layout-list">
+    Multi-file deck assembler. Combines individual slide HTML files via iframe with keyboard navigation.
+  </Card>
+  <Card title="design_canvas.jsx" icon="columns-2">
+    Side-by-side variation grid. Shows 2+ design variants with labels, hover zoom, and click-to-expand.
+  </Card>
+</CardGroup>
+
+---
+
+## animations.jsx — Timeline animation engine
+
+Use `animations.jsx` for any animation HTML that needs time-synchronized motion. It provides a lightweight Stage + Sprite model inspired by Remotion but without the build tooling. The entire engine mounts via `window.Animations` and works inside a `<script type="text/babel">` tag.
+
+**When to use it:** Any animated HTML prototype, product demo, or video export source that needs precise per-frame control over element timing, easing, and interpolation.
+
+**How to incorporate it:** Read the file → paste the entire IIFE source into your HTML's `<script type="text/babel">` block. The engine registers itself on `window.Animations` and exposes all APIs globally.
+
+### API reference
+
+**`Stage`** — wraps the entire animation. Provides the playback ticker, play/pause controls, and the shared `TimeContext`.
+
+```jsx
+<Stage duration={10} loop={true}>
+  {/* Sprite children here */}
+</Stage>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `duration` | number | 10 | Total animation length in seconds |
+| `loop` | boolean | true | Auto-loop; forced to false when `window.__recording === true` |
+
+**`Sprite`** — declares a time window. Children are mounted when playback is between `start` and `end`, and unmounted otherwise.
+
+```jsx
+<Sprite start={0} end={3}>
+  <TitleCard />
+</Sprite>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `start` | number | Seconds at which this sprite becomes active |
+| `end` | number | Seconds at which this sprite is deactivated |
+
+**`useTime()`** — reads the global playback position in seconds.
+
+```jsx
+function MyElement() {
+  const time = useTime();
+  return <div style={{ opacity: time > 1 ? 1 : 0 }}>Hello</div>;
+}
+```
+
+**`useSprite()`** — reads the local progress of the nearest parent `Sprite`.
+
+```jsx
+function MyElement() {
+  const { t, elapsed, duration } = useSprite();
+  // t: normalized 0→1 within the sprite's window
+  // elapsed: seconds since sprite became active
+  // duration: total sprite duration in seconds
+}
+```
+
+**`Easing`** — named easing functions. All accept a normalized `t` (0→1) and return a mapped value.
+
+| Name | Curve | Best for |
+|------|-------|----------|
+| `linear` | `t => t` | Uniform motion |
+| `easeIn` | `t => t * t` | Accelerating entrances |
+| `easeOut` | `t => 1 - (1 - t)²` | Decelerating exits |
+| `easeInOut` | Symmetric smooth | General transitions |
+| `expoOut` | `1 - 2^(-10t)` | Fast start, slow brake — gives numeric elements physical weight |
+| `overshoot` | Cubic with overshoot | Toggle and button pop animations |
+| `spring` | Damped sinusoidal | Elastic bounces |
+| `anticipation` | Wind-up before move | Playful character motion |
+
+**`interpolate(t, inputRange, outputRange, easing?)`** — maps a value from one range to another with optional easing.
+
+```jsx
+const { t } = useSprite();
+const opacity = interpolate(t, [0, 1], [0, 1], Easing.easeOut);
+const y = interpolate(t, [0, 0.5], [40, 0], Easing.expoOut);
+```
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `t` | number | Input value (typically from `useSprite().t` or `useTime()`) |
+| `inputRange` | `[number, number]` | Input start and end |
+| `outputRange` | `[number, number]` | Output start and end |
+| `easing` | function (optional) | Any `Easing.*` function |
+
+### Full example
+
+```jsx
+<Stage duration={6}>
+  <Sprite start={0} end={3}>
+    <TitleSlide />
+  </Sprite>
+  <Sprite start={2} end={6}>
+    <DataChart />
+  </Sprite>
+</Stage>
+
+function TitleSlide() {
+  const { t } = useSprite();
+  const y = interpolate(t, [0, 0.4], [30, 0], Easing.expoOut);
+  const opacity = interpolate(t, [0, 0.3], [0, 1], Easing.easeOut);
+  return (
+    <h1 style={{ transform: `translateY(${y}px)`, opacity }}>
+      Hello
+    </h1>
+  );
+}
+```
+
+---
+
+## ios_frame.jsx — iPhone 15 Pro device chrome
+
+`IosFrame` renders an exact iPhone 15 Pro bezel (393×852 logical pixels) including the Dynamic Island (124×36 px, centered, top 12 px), a status bar with time and battery, and a home indicator. The content area begins at top 54 and ends at bottom 34.
+
+**When to use it:** Any iOS app mockup. This component is mandatory for all iPhone prototypes — do not hand-write Dynamic Island or status bar elements.
+
+**Why not hand-write it:** The Dynamic Island leaves very narrow space for the status bar icons on both sides. Manually estimated values almost always collide or leave incorrect padding that shows content under the island.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `width` | number | 393 | Screen width in logical pixels |
+| `height` | number | 852 | Screen height in logical pixels |
+| `time` | string | `'9:41'` | Status bar time display |
+| `battery` | number | 100 | Battery percentage (0–100) |
+| `darkMode` | boolean | false | Dark screen background and light status icons |
+| `showStatusBar` | boolean | true | Show/hide the status bar |
+| `showDynamicIsland` | boolean | true | Show/hide the Dynamic Island |
+| `showHomeIndicator` | boolean | true | Show/hide the Home Indicator bar |
+
+### The 3-step inclusion pattern
+
+<Steps>
+  <Step title="Read the file">
+    Read `assets/ios_frame.jsx` from the skill directory to get the full source.
+  </Step>
+  <Step title="Paste into your script tag">
+    Copy the entire `iosFrameStyles` constant and `IosFrame` function into your HTML's `<script type="text/babel">` block. The file ends with `window.IosFrame = IosFrame`, which makes it available globally.
+  </Step>
+  <Step title="Wrap your screen content">
+    Wrap your screen component inside `<IosFrame>`. Your content renders in the safe area automatically — you do not manage the island, status bar, or home indicator.
+  </Step>
+</Steps>
+
+```jsx
+// In <script type="text/babel">
+// (paste iosFrameStyles and IosFrame here from assets/ios_frame.jsx)
+
+function MyAppScreen() {
+  return (
+    <div style={{ padding: 16 }}>
+      <h1>My App</h1>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <IosFrame time="9:41" battery={85}>
+      <MyAppScreen />
+    </IosFrame>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+### Multi-screen overview layout
+
+When showing multiple screens side by side (overview mode), wrap each `IosFrame` in a labeled container:
+
+```jsx
+const screens = [
+  { id: 'home', label: 'Home', component: HomeScreen },
+  { id: 'detail', label: 'Detail', component: DetailScreen },
+];
+
+function Overview() {
+  return (
+    <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', padding: 48, alignItems: 'flex-start' }}>
+      {screens.map(s => (
+        <div key={s.id}>
+          <div style={{ fontSize: 13, color: '#666', marginBottom: 8, fontStyle: 'italic' }}>
+            {s.label}
+          </div>
+          <IosFrame time="9:41" battery={85}>
+            <s.component />
+          </IosFrame>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## android_frame.jsx — Android device chrome
+
+Use `android_frame.jsx` for Android app mockups. Read the file and inline it the same way as `ios_frame.jsx`.
+
+**When to use it:** Android app prototypes. Use instead of `ios_frame.jsx` when the target platform is Android or when showing cross-platform comparison.
+
+---
+
+## macos_window.jsx — macOS window chrome
+
+Use `macos_window.jsx` for desktop app mockups that need a macOS window frame with traffic light buttons (close, minimize, zoom) and a title bar.
+
+**When to use it:** Desktop app prototypes, macOS-native tool mockups, or any design where showing the window chrome adds necessary context about the platform.
+
+**How to incorporate it:** Read the file → paste source into your `<script type="text/babel">` → wrap your content in the exported component.
+
+---
+
+## browser_window.jsx — Browser chrome
+
+Use `browser_window.jsx` for web page mockups that need a visible browser frame: URL bar, tab bar, and navigation controls.
+
+**When to use it:** Web page prototypes where the browser context matters — landing pages, dashboards, or comparisons where showing the browser bar helps the audience understand the viewport.
+
+**How to incorporate it:** Read the file → paste source into your `<script type="text/babel">` → wrap your content in the exported component.
+
+---
+
+## deck_stage.js — Single-file slide deck web component
+
+`deck-stage` is a custom HTML element that turns a list of `<section>` elements into a full-featured slide deck. It handles scaling, keyboard navigation, slide counting, and speaker notes without any external framework.
+
+**When to use it:** Single-file decks of 10 slides or fewer, pitch decks, and decks that need cross-slide shared state. For larger or multi-agent decks, use `deck_index.html` instead.
+
+### Features
+
+- Fixed canvas at 1920×1080 (configurable) with auto-scale and letterboxing
+- Keyboard navigation: `←` / `→` / `Space` / `Home` / `End` / `Esc`
+- Left and right click areas for mouse navigation
+- Slide counter showing current / total
+- `localStorage` persistence — survives page refresh
+- Hash navigation: `#slide-5` jumps to slide 5
+- Speaker notes via `postMessage`
+- Print-to-PDF support: `Cmd+P` / `Ctrl+P` renders one slide per page
+
+### Usage
+
+```html
+<deck-stage>
+  <section>
+    <h1>Slide 1</h1>
+  </section>
+  <section>
+    <h1>Slide 2</h1>
+  </section>
+</deck-stage>
+
+<script src="assets/deck_stage.js"></script>
+```
+
+<Warning>
+The `<script>` tag loading `deck_stage.js` **must** be placed after the closing `</deck-stage>` tag, not in `<head>`. If the script runs before the parser processes the child `<section>` elements, `querySelectorAll` returns an empty list and no slides are collected.
+
+Additionally, `display: flex` on `<section>` elements must be applied only on the `.active` class — not unconditionally — to avoid all slides being visible simultaneously.
+</Warning>
+
+### Custom dimensions
+
+```html
+<deck-stage width="1080" height="1920">
+  <!-- vertical slide deck -->
+</deck-stage>
+```
+
+### Speaker notes
+
+Add a JSON script tag to `<head>` to associate notes with each slide:
+
+```html
+<script type="application/json" id="speaker-notes">
+["Notes for slide 1", "Notes for slide 2"]
+</script>
+```
+
+### How to incorporate it
+
+Read `assets/deck_stage.js` → inline the full source into a `<script>` tag placed after `</deck-stage>`. Each `<section>` inside `<deck-stage>` becomes one slide. Style each section independently without worrying about CSS conflicts between slides.
+
+---
+
+## deck_index.html — Multi-file deck assembler
+
+`deck_index.html` is a pre-built host page that loads individual slide HTML files into iframes, stacking them into a navigable deck.
+
+**When to use it:** Decks of 10+ slides, academic or course content, and multi-agent workflows where different agents write different slide files in parallel. Each slide file is completely independent, so CSS and script scope never conflict across slides.
+
+**How to incorporate it:** Copy `assets/deck_index.html` to your project, then list your slide files (e.g. `01-intro.html`, `02-data.html`) in the configuration array. The host page handles keyboard navigation, slide counter, and letterboxed scaling.
+
+**Dependencies for PDF export:** Use `scripts/export_deck_pdf.mjs` with this architecture. See the [export toolchain](/reference/export-toolchain) for full details.
+
+---
+
+## design_canvas.jsx — Side-by-side variation grid
+
+`DesignCanvas` and `Variation` render a labeled grid for comparing two or more static design variants. Each cell shows a variant's label, description, and content frame. Hovering lifts the frame. Clicking expands it to a fullscreen lightbox.
+
+**When to use it:** Design exploration presentations where you want to show 2–4 directions side by side for review and selection. Use instead of separate files when all variants should be visible together.
+
+**How to incorporate it:** Read `assets/design_canvas.jsx` → paste the `canvasStyles`, `DesignCanvas`, and `Variation` sources into your `<script type="text/babel">`. The file ends with `Object.assign(window, { DesignCanvas, Variation })`, making both available globally.
+
+### Props
+
+**`DesignCanvas`**
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `title` | string | — | Canvas headline shown above the grid |
+| `subtitle` | string | — | Descriptive subtitle below the title |
+| `columns` | number | 3 | Number of grid columns |
+| `children` | ReactNode | — | `<Variation>` elements |
+
+**`Variation`**
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | — | Short variant name (e.g. "Minimal") |
+| `description` | string | — | One-line description shown next to the label |
+| `number` | string | auto | Override the auto-generated index number |
+| `aspectRatio` | string | `'4 / 3'` | CSS aspect-ratio for the content frame |
+| `children` | ReactNode | — | The design content to display in this cell |
+
+### Example
+
+```jsx
+<DesignCanvas
+  title="Hero section exploration"
+  subtitle="3 directions for comparison"
+  columns={3}
+>
+  <Variation label="Minimal" description="Restrained, editorial">
+    <MinimalHero />
+  </Variation>
+  <Variation label="Data-led" description="Fathom-style information density">
+    <DataHero />
+  </Variation>
+  <Variation label="Motion" description="Locomotive scroll energy">
+    <MotionHero />
+  </Variation>
+</DesignCanvas>
+```
+
+The grid background is `#F5F5F0`. Each cell has a white frame with a 1px border and a hover shadow. Clicking any cell opens a fullscreen lightbox with a dark overlay; clicking outside the expanded cell dismisses it.
